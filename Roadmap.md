@@ -1,0 +1,1 @@
+I'm writing a spec for a new website I want created. Can you look it over and make suggestions about things I may have forgotten, or things that are unclear? I'd like it to be straightforward to implement, and to have high-quality, maintainable code.
