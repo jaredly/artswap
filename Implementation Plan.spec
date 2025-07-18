@@ -8,7 +8,11 @@ This plan outlines the steps, milestones, and deliverables for building the ArtS
 ## 1. Project Setup
 - Initialize a single repo for the full-stack app (React + server code)
     - use `npx create-react-router@latest my-react-router-app`
-- Set up code formatting, linting, and commit hooks
+- Set up code formatting and linting with Biome:
+    - Install Biome: `npm install --save-dev @biomejs/biome`
+    - Initialize Biome config: `npx biome init`
+    - Add Biome scripts to `package.json` for formatting and linting
+    - Configure editor integration (VS Code extension recommended)
 - Configure CI/CD (GitHub Actions)
   - linting, testing
 - Add README and documentation templates
@@ -47,10 +51,10 @@ This plan outlines the steps, milestones, and deliverables for building the ArtS
 - Notify users of matches via email and in-app
 
 ## 6. Testing
-- Write unit tests for data layer and route actions/loaders
-- Write unit and integration tests for frontend components
-- Add end-to-end tests for critical user flows (onboarding, submission, voting, matching)
-- Maintain high test coverage
+- Write unit tests for each backend module and data layer function as you implement them (using Vitest).
+- Write unit and integration tests for each UI component as you build it (using React Testing Library and Vitest).
+- Add end-to-end tests for onboarding, submission, voting, matching (Cypress or Playwright) after core flows are complete.
+- Ensure CI runs all tests (Vitest) and Biome lint/format checks on every push/PR.
 
 ## 7. Deployment
 - this will be handled separately, via a `deploy.sh` script that the client will provide
@@ -99,16 +103,21 @@ This plan outlines the steps, milestones, and deliverables for building the ArtS
 ## 1. Project Initialization
 1. Run `npx create-react-router@latest art-swap-app` to scaffold the project.
 2. Initialize git repository and push to remote.
-3. Set up code formatting (Prettier), linting (ESLint), and commit hooks (Husky).
+3. Set up code formatting and linting with Biome:
+    - Install Biome: `npm install --save-dev @biomejs/biome`
+    - Initialize Biome config: `npx biome init`
+    - Add Biome scripts to `package.json` for formatting and linting
+    - Configure editor integration (VS Code extension recommended)
 4. Create initial README with project overview and setup instructions.
 5. Configure GitHub Actions for CI (lint, test).
 
 ## 2. Database & Prisma Setup
 1. Install Prisma and SQLite: `npm install prisma @prisma/client sqlite3`.
 2. Run `npx prisma init` to create Prisma config.
-3. Define the data model in `prisma/schema.prisma` for Artist, Group, Event, Artwork, Match, Invitation.
+3. Define the data model in `prisma/schema.prisma` for Artist, Group, Event, Artwork, Match, Invitation, Notification.
 4. Run `npx prisma migrate dev --name init` to create the initial database.
 5. Implement seed scripts for test data.
+6. Add Notification entity to seed data and CRUD functions.
 
 ## 3. Backend Utilities & Data Layer
 1. Create a `db` module to wrap Prisma client and expose CRUD functions for each entity.
@@ -155,7 +164,7 @@ This plan outlines the steps, milestones, and deliverables for building the ArtS
 1. Write unit tests for data layer (Prisma CRUD, business logic).
 2. Write unit and integration tests for frontend components (React Testing Library).
 3. Add end-to-end tests for onboarding, submission, voting, matching (Cypress or Playwright).
-4. Ensure CI runs all tests on every push/PR.
+4. Ensure CI runs all tests (Vitest) and Biome lint/format checks on every push/PR.
 
 ## 8. Deployment
 1. Prepare a `deploy.sh` script for deployment (as per client instructions).
@@ -179,3 +188,5 @@ This plan outlines the steps, milestones, and deliverables for building the ArtS
 - All code should be reviewed before merging.
 - Accessibility and security should be validated at each stage.
 - Regularly update documentation as features are added.
+- Run Biome lint and format checks before every commit and in CI.
+- Write and maintain unit tests for all backend and frontend modules as features are developed (using Vitest).
