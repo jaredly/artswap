@@ -121,10 +121,10 @@ This plan outlines the steps, milestones, and deliverables for building the ArtS
 
 ## 3. Backend Utilities & Data Layer
 1. Create a `db` module to wrap Prisma client and expose CRUD functions for each entity.
-2. Implement authentication logic (password hashing, session management, invitation token validation).
+2. Implement authentication logic (password hashing, session management, invitation token validation, password reset, and account recovery flows).
 3. Set up email sending utility (Mailgun integration).
 4. Implement image upload logic (local file system, with validation and resizing).
-5. Add error handling and input validation utilities.
+5. Add error handling and input validation utilities. Implement logging and monitoring for production errors (e.g., Sentry or similar).
 
 ## 4. Routing, Loaders, and Actions
 1. Define route modules for all major pages:
@@ -152,7 +152,7 @@ This plan outlines the steps, milestones, and deliverables for building the ArtS
 6. Build portfolio management UI (add/remove art, attach to event).
 7. Build admin moderation UI (flag art, remove users).
 8. Implement in-app notifications and match history.
-9. Ensure mobile-first, dark mode, and accessibility compliance (test with screen readers, keyboard navigation).
+9. Ensure mobile-first, dark mode, and accessibility compliance (test with screen readers, keyboard navigation, color contrast checks, and ARIA attributes).
 
 ## 6. Matching & Voting Logic
 1. Implement voting UI and logic in event route actions.
@@ -172,9 +172,9 @@ This plan outlines the steps, milestones, and deliverables for building the ArtS
 3. Test deployment to staging and production environments.
 
 ## 9. Documentation & Legal
-1. Document all route modules, loaders, actions, and data models.
+1. Document all route modules, loaders, actions, and data models (docstring comments in code are sufficient; no external API docs required).
 2. Write user and admin guides for all major flows.
-3. Draft terms of service and privacy policy.
+3. Draft terms of service and privacy policy. Add process for user data export/deletion (for privacy compliance).
 
 ## 10. Maintenance & Future Enhancements
 1. Monitor error logs and user feedback.
@@ -186,7 +186,8 @@ This plan outlines the steps, milestones, and deliverables for building the ArtS
 # Execution Notes
 - Each step should be tracked in a project board (e.g., GitHub Projects).
 - All code should be reviewed before merging.
-- Accessibility and security should be validated at each stage.
-- Regularly update documentation as features are added.
+- Accessibility and security should be validated at each stage (including color contrast and ARIA attributes).
+- Regularly update documentation as features are added (docstring comments in code).
 - Run Biome lint and format checks before every commit and in CI.
 - Write and maintain unit tests for all backend and frontend modules as features are developed (using Vitest).
+- Hold regular sprint reviews or demos for stakeholders.
