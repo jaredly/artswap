@@ -12,74 +12,126 @@
 
 ## High-level Description
 
-This website allows local artists to exchange artwork with each other, using a Tindr-style interface of "like" and "dislike".
-Artists can join "groups" that have "events" where artists can submit their art for potential swaps. When two artists "like" each other's artworks, a match is made, and those two works are removed from the pool.
-The "event" generally corresponds to an in-person meeting, where the artists will physically meet up and exchange any are that was "matched" with another artist's art.
+This website allows local artists to exchange artwork with each other, using a Tindr-style interface of "like" and "dislike". Artists can join "groups" that have "events" where artists can submit their art for potential swaps. When two artists "like" each other's artworks, a match is made, and those two works are removed from the pool. The "event" generally corresponds to an in-person meeting, where the artists will physically meet up and exchange any art that was "matched" with another artist's art.
 
-## Design choices
+## Design Choices
 
-- favor minimalist design aesthetic
-- dark-mode enabled
-- mobile-first, with desktop screen sizes a distant second
+- Favor minimalist design aesthetic
+- Dark-mode enabled
+- Mobile-first, with desktop screen sizes a distant second
+- Accessibility: follow WCAG guidelines, support keyboard navigation and screen readers
+- Consider PWA features for installability and offline support
 
-## Structure
+## Data Model Overview
 
-- Artists can join one or more "Groups", which probably corrspond to geographic regions, but don't have to
-- A group has admins and regular members
-- A group admin can create a "swap event" for that group
-- a group can only have one "open" event at a time, and one "voting" event.
-- A "swap event" can have a "per-artist submission limit"
-- Artists (whether admin or regular member) can upload pictures of art that they are interested in swapping, along with title/description/medium/dimensions/year metadata
-- A swap event goes through 4 phases:
-    - Initially, it is "open for submissions", and artists can add their artworks to the event
-    - Then it transitions to the "voting" period, where artists indicate their preference for (or against) the other pieces of art in the pool
-        - no more art can be added when it is in "voting"
-        - when an artist "finalizes their votes", matching can occur.
-    - Finally, the event is "closed", and no more voting can occur, and all unfinalized votes are finalized. This generally happens a day or so in advance of the physical meetup.
-    - After all matches have been fulfilled (as determined by the admin), the event gets "archived"
-- Matching is the process of pairing one piece of art from one artist with another piece from another artist, producing a "swap". Both pieces of art are removed from the voting pool at that point.
-- When a match occurs, both artists are notified via email.
+- **Artist**: id, name, email, password hash, profile picture, groups, portfolio
+- **Group**: id, name, admins, members, events
+- **Event**: id, group, phase, submission limit, artworks, matches
+- **Artwork**: id, artist, title, description, medium, dimensions, year, images (1-5), status (portfolio/event/matched/flagged)
+- **Match**: id, artwork1, artwork2, event, status
+- **Invitation**: id, group, email, token, status
 
-## Onboarding flow
+## User Roles & Permissions
 
-- In order to join ArtSwap (and their first group), a person must receive an invitation from an admin (via email, or via a link)
-- They'll be asked to create an account, with email, password, full name (no usernames), and an optional profile picture
-- If there's an "open" event for the group their in, they'll be taken to the "add art to event" flow
-- otherwise, they'll be informed that "no event is currently open, but you can add art to your portfolio"
+- **Super-admin**: create/manage groups, manage users site-wide
+- **Group admin**: create/manage events, invite users, flag/remove art, remove users from group
+- **Member**: submit art, vote, manage own portfolio
 
-## Add Art to Event flow
+## Authentication & Security
 
-- upload 1-5 photos of the art
-- fill in metadata
-- save, then view the list of art you've added to the event, along with a button to add more (as long as you're not at the limit for this event)
+- Email verification required for new accounts
+- Password requirements: minimum length, complexity
+- Optional 2FA for added security
+- Account recovery via email
 
-## Add Art to Portfolio flow
+## Notifications
 
-- at any time, an artist can upload art that's not attached to any event
-- later, they can add it to an event
-- a piece of art can only be added to a single event at a time
-- they can withdraw a piece of art from an event, as long as the event is not in the "voting" phase
-- a piece of art that has been "matched" can no longer be added to any events.
+- Email notifications for matches, invitations, flagged art
+- In-app notifications for all major actions (match, event phase change, etc.)
+- Optional push notifications (future enhancement)
+
+## Art Submission & Metadata
+
+- Upload 1-5 images per artwork (different views)
+- Required metadata: title
+- Optional metadata: description, medium, dimensions, year, additional notes
+- Art can be added to portfolio or directly to an event
+
+## Event Lifecycle
+
+- Phases: open for submissions → voting → closed → archived
+- Only group admins can transition event phases
+- Once closed, all unfinalized votes are finalized
+- Archived after all matches are fulfilled
+- If an event is accidentally advanced in phase, the admin can manually change the phase back
+
+## Matching Algorithm
+
+- Mutual likes between two artworks triggers a match
+- Both artworks are removed from the voting pool
+- Unmatched pieces remain in the pool until event closes
+- At event end (archival), unmatched art is returned to portfolio
+
+## Moderation & Flagging
+
+- Admins can flag art, making it hidden from non-admins
+- Artists are notified when their art is flagged
+- Flagged art can be appealed by contacting group admin (out of band)
+- Admins can remove users from their group
+
+## Onboarding Flow
+
+- Invitation required to join (email or link)
+- Account creation: email, password, full name, optional profile picture
+- Email verification is implied by receipt of invitation link
+
+## Add Art to Event Flow
+
+- Upload 1-5 photos of the art
+- Fill in required metadata
+- Save, then view/manage list of art added to event
+- Add more art up to event submission limit
+
+## Add Art to Portfolio Flow
+
+- Artists can upload art not attached to any event
+- Art can later be added to an event (only one event at a time)
+- Art can be withdrawn from event if not in voting phase
+- Matched art cannot be added to future events
 
 ## Navigation
 
-- in the hamburger menu, the user can select their "active group" if they are a member of multiple groups. otherwise, no need to show that UI
-- on the home screen, if the active group has an event in "voting" stage, show the voting UI
-- otherwise, if the active group has an event in the "open" stage, show the "add/manage art to event" UI
-- otherwise, if the active group has an event in the "closed" stage, and the user has art that was matched with art from other artists, show those matches
-- otherwise, show the "add art to portfolio" UI
+- Hamburger menu: select active group if member of multiple groups
+- Home screen:
+    - If active group has event in voting stage, show voting UI
+    - If event is open, show add/manage art to event UI
+    - If event is closed and user has matched art, show matches
+    - Otherwise, show add art to portfolio UI
 
 ## Admin Navigation
 
-- create groups (only available to a super-admin)
-- manage group (for the user's active group)
-    - manage events
-        - change an event's current "phase" (open, voting, closed, archived)
-    - manage users
-        - manage invigations
+- Super-admin: create/manage groups, manage users site-wide
+- Group admin: manage events (change phase), manage users, manage invitations
 
-## Moderation
+## Testing & Quality
 
-- An admin can flag art submitted to events in their group, which make the pieces hidden from all non-admin users, and the artist should be notified of the flagging
-- An admin can also remove a user from their group
+- Use linting and formatting tools (e.g., Typescript, Biome)
+- Maintain high test coverage (unit, integration, e2e)
+- Use CI/CD (Github actions) for automated testing and deployment
+- Document API and data models
+
+## Error Handling & Edge Cases
+
+- Prevent submission of more art than allowed per event
+- Provide clear error messages for all user actions
+
+## Scalability & Performance
+
+- honestly don't worry about this. we expect usage to remain modest, so don't prematurely optimize
+
+## Legal & Privacy
+
+- Terms of service and privacy policy required
+- Copyright handling for uploaded art
+- Data retention and deletion policies
 
