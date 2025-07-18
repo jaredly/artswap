@@ -14,6 +14,26 @@ datasource db {
     url      = "file:./dev.db"
 }
 
+enum ArtworkStatus {
+  PORTFOLIO
+  EVENT
+  MATCHED
+  FLAGGED
+}
+
+enum NotificationType {
+  MATCH
+  EVENT
+  FLAG
+  OTHER
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  EXPIRED
+}
+
 model Artist {
     id            String            @id @default(uuid())
     email         String            @unique
@@ -24,6 +44,8 @@ model Artist {
     artworks      Artwork[]
     notifications Notification[]
     createdAt     DateTime          @default(now())
+    resetToken   String? // for password reset
+    resetTokenExpiry DateTime?
 }
 
 model Group {
@@ -70,7 +92,7 @@ model Artwork {
     dimensions  String?
     year        Int?
     images      Json // Array of file paths or URLs
-    status      String // portfolio, event, matched, flagged
+    status      ArtworkStatus
     createdAt   DateTime @default(now())
     Match1      Match?   @relation("MatchArtwork1")
     Match2      Match?   @relation("MatchArtwork2")
@@ -94,7 +116,7 @@ model Invitation {
     groupId   String
     email     String
     token     String   @unique
-    status    String // e.g., pending, accepted, expired
+    status    InvitationStatus
     createdAt DateTime @default(now())
 }
 
@@ -102,7 +124,7 @@ model Notification {
     id        String   @id @default(uuid())
     artist    Artist   @relation(fields: [artistId], references: [id])
     artistId  String
-    type      String // e.g., match, event, flag, etc.
+    type      NotificationType
     message   String
     read      Boolean  @default(false)
     createdAt DateTime @default(now())
