@@ -15,37 +15,57 @@ datasource db {
 }
 
 enum ArtworkStatus {
-  PORTFOLIO
-  EVENT
-  MATCHED
-  FLAGGED
+    PORTFOLIO
+    EVENT
+    MATCHED
+    FLAGGED
 }
 
 enum NotificationType {
-  MATCH
-  EVENT
-  FLAG
-  OTHER
+    MATCH
+    EVENT
+    FLAG
+    OTHER
 }
 
 enum InvitationStatus {
-  PENDING
-  ACCEPTED
-  EXPIRED
+    PENDING
+    ACCEPTED
+    EXPIRED
+}
+
+enum UserRole {
+    USER
+    SUPER_ADMIN
+}
+
+enum UserStatus {
+    ACTIVE
+    SUSPENDED
+    DEACTIVATED
 }
 
 model Artist {
-    id            String            @id @default(uuid())
-    email         String            @unique
-    passwordHash  String
-    fullName      String
-    profilePic    String? // URL or file path
-    memberships   GroupMembership[]
-    artworks      Artwork[]
-    notifications Notification[]
-    createdAt     DateTime          @default(now())
-    resetToken   String? // for password reset
-    resetTokenExpiry DateTime?
+    id                      String               @id @default(uuid())
+    email                   String               @unique
+    passwordHash            String
+    fullName                String
+    profilePic              String? // URL or file path
+    role                    UserRole             @default(USER)
+    status                  UserStatus           @default(ACTIVE)
+    emailVerified           Boolean              @default(false)
+    verificationToken       String?
+    verificationTokenExpiry DateTime?
+    resetToken              String? // for password reset
+    resetTokenExpiry        DateTime?
+    memberships             GroupMembership[]
+    artworks                Artwork[]
+    notifications           Notification[]
+    votes                   Vote[]
+    eventParticipations     EventParticipation[]
+    auditLogs               AuditLog[]
+    sessions                Session[]
+    createdAt               DateTime             @default(now())
 }
 
 model Group {
@@ -70,21 +90,23 @@ model GroupMembership {
 }
 
 model Event {
-    id              String    @id @default(uuid())
-    group           Group     @relation(fields: [groupId], references: [id])
+    id              String               @id @default(uuid())
+    group           Group                @relation(fields: [groupId], references: [id])
     groupId         String
     phase           String // open, voting, closed, archived
     submissionLimit Int
     artworks        Artwork[]
     matches         Match[]
-    createdAt       DateTime  @default(now())
+    votes           Vote[]
+    participations  EventParticipation[]
+    createdAt       DateTime             @default(now())
 }
 
 model Artwork {
-    id          String   @id @default(uuid())
-    artist      Artist   @relation(fields: [artistId], references: [id])
+    id          String        @id @default(uuid())
+    artist      Artist        @relation(fields: [artistId], references: [id])
     artistId    String
-    event       Event?   @relation(fields: [eventId], references: [id])
+    event       Event?        @relation(fields: [eventId], references: [id])
     eventId     String?
     title       String
     description String?
@@ -93,9 +115,10 @@ model Artwork {
     year        Int?
     images      Json // Array of file paths or URLs
     status      ArtworkStatus
-    createdAt   DateTime @default(now())
-    Match1      Match?   @relation("MatchArtwork1")
-    Match2      Match?   @relation("MatchArtwork2")
+    votes       Vote[]
+    createdAt   DateTime      @default(now())
+    Match1      Match?        @relation("MatchArtwork1")
+    Match2      Match?        @relation("MatchArtwork2")
 }
 
 model Match {
@@ -110,22 +133,67 @@ model Match {
     createdAt  DateTime @default(now())
 }
 
-model Invitation {
-    id        String   @id @default(uuid())
-    group     Group    @relation(fields: [groupId], references: [id])
-    groupId   String
-    email     String
-    token     String   @unique
-    status    InvitationStatus
-    createdAt DateTime @default(now())
-}
-
-model Notification {
+model Vote {
     id        String   @id @default(uuid())
     artist    Artist   @relation(fields: [artistId], references: [id])
     artistId  String
+    artwork   Artwork  @relation(fields: [artworkId], references: [id])
+    artworkId String
+    event     Event    @relation(fields: [eventId], references: [id])
+    eventId   String
+    liked     Boolean
+    createdAt DateTime @default(now())
+
+    @@unique([artistId, artworkId, eventId])
+}
+
+model EventParticipation {
+    id       String   @id @default(uuid())
+    artist   Artist   @relation(fields: [artistId], references: [id])
+    artistId String
+    event    Event    @relation(fields: [eventId], references: [id])
+    eventId  String
+    joinedAt DateTime @default(now())
+
+    @@unique([artistId, eventId])
+}
+
+model Session {
+    id        String   @id @default(uuid())
+    artist    Artist   @relation(fields: [artistId], references: [id])
+    artistId  String
+    token     String   @unique
+    expiresAt DateTime
+    createdAt DateTime @default(now())
+}
+
+model AuditLog {
+    id         String   @id @default(uuid())
+    actor      Artist   @relation(fields: [actorId], references: [id])
+    actorId    String
+    action     String // "FLAG_ARTWORK", "REMOVE_USER", "CHANGE_EVENT_PHASE", etc.
+    targetType String // "ARTWORK", "USER", "EVENT", "GROUP"
+    targetId   String
+    details    Json? // Additional context
+    createdAt  DateTime @default(now())
+}
+
+model Invitation {
+    id        String           @id @default(uuid())
+    group     Group            @relation(fields: [groupId], references: [id])
+    groupId   String
+    email     String
+    token     String           @unique
+    status    InvitationStatus
+    createdAt DateTime         @default(now())
+}
+
+model Notification {
+    id        String           @id @default(uuid())
+    artist    Artist           @relation(fields: [artistId], references: [id])
+    artistId  String
     type      NotificationType
     message   String
-    read      Boolean  @default(false)
-    createdAt DateTime @default(now())
+    read      Boolean          @default(false)
+    createdAt DateTime         @default(now())
 }
