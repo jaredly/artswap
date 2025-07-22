@@ -75,7 +75,10 @@ echo "- JWT_SECRET (generate with: openssl rand -base64 32)"
     "zod": "^3.22.0",
     "winston": "^3.10.0",
     "uuid": "^9.0.0",
-    "mime-types": "^2.1.35"
+    "mime-types": "^2.1.35",
+    "@dnd-kit/core": "^6.1.0",
+    "@dnd-kit/sortable": "^8.0.0",
+    "@dnd-kit/utilities": "^3.2.2"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.0.0",
@@ -717,51 +720,113 @@ interface AutoTrigger {
 }
 ```
 
+### Enhanced Voting Flow Specification
+
+**Step 1: Sequential Voting (Tinder-Style)**
+```typescript
+interface VotingSession {
+  eventId: string;
+  artworkQueue: Artwork[];
+  currentIndex: number;
+  votes: VoteData[];
+}
+
+interface VoteData {
+  artworkId: string;
+  liked: boolean;
+  timestamp: Date;
+}
+```
+
+**Step 2: Vote Overview & Preference Ordering**
+```typescript
+interface VoteOverview {
+  liked: Array<{
+    artwork: Artwork;
+    preferenceOrder: number; // 1 = most preferred
+  }>;
+  passed: Artwork[];
+  canModify: boolean; // false if already finalized
+}
+
+// User can:
+// 1. Drag to reorder liked artworks (changes preferenceOrder)
+// 2. Move artwork from liked to passed (sets liked = false, preferenceOrder = null)
+// 3. Move artwork from passed to liked (sets liked = true, assigns preferenceOrder)
+```
+
+**Step 3: Vote Finalization**
+```typescript
+interface VoteFinalization {
+  artistId: string;
+  eventId: string;
+  finalizedVotes: Array<{
+    artworkId: string;
+    liked: boolean;
+    preferenceOrder?: number;
+  }>;
+  finalizedAt: Date;
+}
+
+// Once finalized:
+// - All votes for this artist/event marked as finalized = true
+// - No further modifications allowed
+// - Preference order locked for matching algorithm
+```
+
 ### Voting Finalization
 
 When transitioning from VOTING to CLOSED:
-1. Calculate all mutual likes
-2. Create Match records
-3. Send match notifications
-4. Lock all votes (no changes allowed)
-5. Update event phase
-6. Log transition in audit log
+1. Auto-finalize any unfinalized votes (keep current state)
+2. Calculate mutual likes using preference order for tie-breaking
+3. Create Match records prioritizing higher preference matches
+4. Send match notifications
+5. Lock all votes (no changes allowed)
+6. Update event phase
+7. Log transition in audit log
 
 ---
 
 ## 8. Matching Algorithm Specification
 
-### Mutual Like Detection
+### Preference-Based Matching Algorithm
 
 ```typescript
 interface MatchingResult {
   matches: Array<{
     artwork1Id: string;
     artwork2Id: string;
-    score: number; // For future ranking
+    artist1PreferenceOrder: number;
+    artist2PreferenceOrder: number;
+    combinedScore: number; // Lower is better (sum of preference orders)
   }>;
   unmatched: string[]; // Artwork IDs with no matches
   statistics: {
     totalVotes: number;
     totalMatches: number;
     participationRate: number;
+    averagePreferenceScore: number;
   };
 }
 
 async function calculateMatches(eventId: string): Promise<MatchingResult> {
-  // 1. Get all votes for the event
+  // 1. Get all finalized votes for the event where liked = true
   // 2. For each artwork pair, check if both artists liked each other's work
-  // 3. Create matches for mutual likes
-  // 4. Return results with statistics
+  // 3. Calculate combined preference score (sum of both preference orders)
+  // 4. Sort potential matches by combined score (lower = more preferred)
+  // 5. Create matches starting with highest mutual preference
+  // 6. Remove matched artworks from further consideration
+  // 7. Return results with preference-based statistics
 }
 ```
 
-### Tie Breaking
+### Enhanced Matching Rules
 
-When multiple potential matches exist:
-1. **First come, first served**: Earlier votes win
-2. **Random selection**: For simultaneous votes
-3. **Admin override**: Manual match assignment available
+When creating matches, priority order:
+1. **Mutual Preference Score**: Sum of both artists' preference orders (lower = better)
+2. **Individual Preference**: If tied, prioritize matches where at least one artist ranked it #1
+3. **Vote Timing**: If still tied, earlier votes win (first-come-first-served)
+4. **Admin Override**: Manual match assignment always takes precedence
 
 ---
 
@@ -835,8 +900,9 @@ app/
 ├── components/
 │   ├── ui/                # Basic UI components
 │   ├── forms/             # Form components
-│   ├── navigation/        # Navigation components
-│   └── layout/            # Layout components
+│   ├── navigation/        # Minimal navigation (bottom nav, floating actions)
+│   ├── artwork/           # Artwork display components
+│   └── voting/            # Voting interface components
 ├── routes/
 │   ├── _auth.tsx          # Auth layout route
 │   ├── login.tsx          # Login page
@@ -982,6 +1048,85 @@ const ACCESSIBILITY_CHECKLIST = {
 - **NVDA/JAWS**: Screen reader testing
 - **Keyboard navigation**: Tab order validation
 - **Color contrast analyzer**: Manual validation
+
+---
+
+## 12.5. Mobile-First Minimal Design Principles
+
+### Core Philosophy
+- **Task-Focused**: Design for specific user intents and flows
+- **Single-Track**: Guide users through linear workflows
+- **Minimal Chrome**: Only essential UI elements visible
+- **Context-Aware**: Show relevant actions based on current state
+
+### Navigation Pattern
+```typescript
+// Minimal hamburger menu - secondary navigation only
+const HamburgerMenu = {
+  items: [
+    { icon: 'home', label: 'Home', route: '/home' },
+    { icon: 'palette', label: 'My Portfolio', route: '/portfolio' },
+    { icon: 'users', label: 'Groups', route: '/groups' },
+    { icon: 'heart', label: 'Matches', route: '/matches' },
+    { icon: 'settings', label: 'Settings', route: '/profile' }
+  ]
+};
+
+// Context-aware floating actions
+const FloatingActions = {
+  '/events/:id': { icon: 'plus', label: 'Submit Art', primary: true },
+  '/events/:id/voting': { icon: 'heart', label: 'Vote', primary: true },
+  '/portfolio': { icon: 'plus', label: 'Add Artwork', primary: true }
+};
+```
+
+### Layout Structure
+```typescript
+// Ultra-minimal layout - page header + content
+<header className="flex items-center justify-between p-4">
+  <BackButton />
+  <PageTitle />
+  <HamburgerMenu />
+</header>
+<main className="flex-1"> {/* Full-screen content */}
+  <Outlet />
+</main>
+<FloatingAction /> {/* Context-aware */}
+```
+
+### Single-Track User Flows
+```typescript
+// Primary user journeys - focused and linear
+const UserFlows = {
+  submitArtwork: [
+    '/events/:id',           // See event details
+    '/events/:id/submit',    // Submit artwork form
+    '/portfolio'             // Confirmation & manage submissions
+  ],
+
+  voteInEvent: [
+    '/events/:id/voting',    // Sequential Tinder-style voting
+    '/events/:id/summary',   // Review & reorder preferences
+    '/events/:id/finalize',  // Final review before locking votes
+    '/events/:id'            // Event details with vote confirmation
+  ],
+
+  checkMatches: [
+    '/matches',              // Match notifications & history
+    '/matches/:id',          // Individual match details
+    '/events/:id'            // Back to event context
+  ]
+};
+```
+
+### Design Guidelines
+- **Touch Targets**: Minimum 44px (11rem) for all interactive elements
+- **Spacing**: Use consistent 4px base unit (Tailwind's spacing scale)
+- **Typography**: Clear hierarchy, readable at mobile sizes
+- **Colors**: High contrast, minimal palette
+- **Animations**: Subtle, functional (not decorative)
+- **Flow Indicators**: Show progress in multi-step processes
+- **Context Preservation**: Always clear where user is and how to go back
 
 ---
 

@@ -134,17 +134,21 @@ model Match {
 }
 
 model Vote {
-    id        String   @id @default(uuid())
-    artist    Artist   @relation(fields: [artistId], references: [id])
-    artistId  String
-    artwork   Artwork  @relation(fields: [artworkId], references: [id])
-    artworkId String
-    event     Event    @relation(fields: [eventId], references: [id])
-    eventId   String
-    liked     Boolean
-    createdAt DateTime @default(now())
+    id              String   @id @default(uuid())
+    artist          Artist   @relation(fields: [artistId], references: [id])
+    artistId        String
+    artwork         Artwork  @relation(fields: [artworkId], references: [id])
+    artworkId       String
+    event           Event    @relation(fields: [eventId], references: [id])
+    eventId         String
+    liked           Boolean
+    preferenceOrder Int? // 1 = most preferred, null for disliked artworks
+    finalized       Boolean  @default(false) // true when user finalizes votes for this event
+    createdAt       DateTime @default(now())
+    updatedAt       DateTime @updatedAt
 
     @@unique([artistId, artworkId, eventId])
+    @@unique([artistId, eventId, preferenceOrder]) // Ensure unique preference order per user per event
 }
 
 model EventParticipation {
