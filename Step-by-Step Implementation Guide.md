@@ -7,23 +7,23 @@ This guide provides a detailed, checkbox-driven roadmap for implementing ArtSwap
 ## Phase 1: Project Setup & Foundation
 
 ### 1.1 Initial Project Setup
-- [ ] Run `npx create-react-router@latest .` to scaffold the project
-- [ ] Initialize git repository: `git init && git add . && git commit -m "Initial commit"`
-- [ ] Create `.gitignore` file with node_modules, .env, logs/, uploads/, build/
-- [ ] Set up remote repository and push initial commit
-- [ ] Install additional dependencies:
+- [x] Run `npx create-react-router@latest .` to scaffold the project
+- [x] Initialize git repository: `git init && git add . && git commit -m "Initial commit"`
+- [x] Create `.gitignore` file with node_modules, .env, logs/, uploads/, build/
+- [x] Set up remote repository and push initial commit
+- [x] Install additional dependencies:
   ```bash
   pnpm add @prisma/client bcryptjs sharp mailgun.js helmet express-rate-limit zod winston uuid mime-types @react-email/components @react-email/render @dnd-kit/core @dnd-kit/sortable @dnd-kit/utilities
   ```
-- [ ] Install dev dependencies:
+- [x] Install dev dependencies:
   ```bash
   pnpm add -D @biomejs/biome @types/bcryptjs @types/mime-types @types/uuid @react-router/dev prisma vitest @testing-library/react @testing-library/jest-dom playwright @react-email/tailwind
   ```
 
 ### 1.2 Biome Configuration
-- [ ] Run `npx biome init` to create biome.json
-- [ ] Configure biome.json with TypeScript, React, and formatting rules
-- [ ] Add Biome scripts to package.json:
+- [x] Run `npx biome init` to create biome.json
+- [x] Configure biome.json with TypeScript, React, and formatting rules
+- [x] Add Biome scripts to package.json:
   ```json
   {
     "scripts": {
@@ -33,7 +33,7 @@ This guide provides a detailed, checkbox-driven roadmap for implementing ArtSwap
     }
   }
   ```
-- [ ] Run initial format: `pnpm format`
+- [x] Run initial format: `pnpm format`
 
 ### 1.3 Environment Configuration
 - [ ] Create `.env.example` file with all required environment variables
