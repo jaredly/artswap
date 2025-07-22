@@ -10,6 +10,8 @@
     "format:check": "biome format .",
     "format": "biome format . --fix",
     "lint": "biome check . --fix",
+    "email:dev": "email dev --dir app/lib/email/templates",
+    "email:export": "email export --dir app/lib/email/templates --out ./email-previews",
     "test": "vitest run"
   },
   "dependencies": {

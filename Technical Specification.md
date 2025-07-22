@@ -746,7 +746,8 @@ interface VoteOverview {
     preferenceOrder: number; // 1 = most preferred
   }>;
   passed: Artwork[];
-  canModify: boolean; // false if already finalized
+  canModify: boolean; // false if finalizedAt is not null
+  finalizedAt?: Date; // when votes were locked, undefined if not finalized
 }
 
 // User can:
@@ -769,21 +770,22 @@ interface VoteFinalization {
 }
 
 // Once finalized:
-// - All votes for this artist/event marked as finalized = true
-// - No further modifications allowed
+// - All votes for this artist/event get finalizedAt timestamp
+// - No further modifications allowed (finalizedAt !== null)
 // - Preference order locked for matching algorithm
+// - Provides audit trail of when votes were locked
 ```
 
 ### Voting Finalization
 
 When transitioning from VOTING to CLOSED:
-1. Auto-finalize any unfinalized votes (keep current state)
+1. Auto-finalize any unfinalized votes (set finalizedAt to current timestamp)
 2. Calculate mutual likes using preference order for tie-breaking
 3. Create Match records prioritizing higher preference matches
 4. Send match notifications
-5. Lock all votes (no changes allowed)
+5. Lock all votes (finalizedAt prevents further changes)
 6. Update event phase
-7. Log transition in audit log
+7. Log transition in audit log with finalization timestamps
 
 ---
 
@@ -810,13 +812,13 @@ interface MatchingResult {
 }
 
 async function calculateMatches(eventId: string): Promise<MatchingResult> {
-  // 1. Get all finalized votes for the event where liked = true
+  // 1. Get all votes for the event where finalizedAt is not null and liked = true
   // 2. For each artwork pair, check if both artists liked each other's work
   // 3. Calculate combined preference score (sum of both preference orders)
   // 4. Sort potential matches by combined score (lower = more preferred)
   // 5. Create matches starting with highest mutual preference
   // 6. Remove matched artworks from further consideration
-  // 7. Return results with preference-based statistics
+  // 7. Return results with preference-based statistics and finalization timestamps
 }
 ```
 

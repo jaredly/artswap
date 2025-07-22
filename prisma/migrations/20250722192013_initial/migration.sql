@@ -81,7 +81,7 @@ CREATE TABLE "Vote" (
     "eventId" TEXT NOT NULL,
     "liked" BOOLEAN NOT NULL,
     "preferenceOrder" INTEGER,
-    "finalized" BOOLEAN NOT NULL DEFAULT false,
+    "finalizedAt" DATETIME,
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" DATETIME NOT NULL,
     CONSTRAINT "Vote_artistId_fkey" FOREIGN KEY ("artistId") REFERENCES "Artist" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,

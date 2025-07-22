@@ -36,16 +36,16 @@ This guide provides a detailed, checkbox-driven roadmap for implementing ArtSwap
 - [x] Run initial format: `pnpm format`
 
 ### 1.3 Environment Configuration
-- [ ] Create `.env.example` file with all required environment variables
-- [ ] Create `.env` file from example
-- [ ] Generate SESSION_SECRET: `openssl rand -base64 32`
-- [ ] Generate JWT_SECRET: `openssl rand -base64 32`
-- [ ] Create `setup-env.sh` script from Technical Specification
-- [ ] Make setup script executable: `chmod +x setup-env.sh`
+- [x] Create `.env.example` file with all required environment variables
+- [x] Create `.env` file from example
+- [x] Generate SESSION_SECRET: `openssl rand -base64 32`
+- [x] Generate JWT_SECRET: `openssl rand -base64 32`
+- [x] Create `setup-env.sh` script from Technical Specification
+- [x] Make setup script executable: `chmod +x setup-env.sh`
 
 ### 1.4 React Router Configuration
-- [ ] Create `react-router.config.ts` with SSR configuration from Technical Specification
-- [ ] Update package.json scripts for React Router v7:
+- [x] Create `react-router.config.ts` with SSR configuration from Technical Specification
+- [x] Update package.json scripts for React Router v7:
   ```json
   {
     "scripts": {
@@ -64,11 +64,11 @@ This guide provides a detailed, checkbox-driven roadmap for implementing ArtSwap
 ## Phase 2: Database & Prisma Setup
 
 ### 2.1 Prisma Initialization
-- [ ] Run `npx prisma init` to create Prisma configuration
-- [ ] Update `prisma/schema.prisma` with the complete schema from the project
-- [ ] Set DATABASE_URL in .env to `file:./dev.db`
-- [ ] Run `npx prisma migrate dev --name initial-schema` to create database
-- [ ] Run `npx prisma generate` to generate Prisma client
+- [x] Run `npx prisma init` to create Prisma configuration
+- [x] Update `prisma/schema.prisma` with the complete schema from the project
+- [x] Set DATABASE_URL in .env to `file:./dev.db`
+- [x] Run `npx prisma migrate dev --name initial-schema` to create database
+- [x] Run `npx prisma generate` to generate Prisma client
 
 ### 2.2 Database Utilities Setup
 - [ ] Create `app/lib/db/index.ts` file with Prisma client singleton
@@ -247,14 +247,14 @@ This guide provides a detailed, checkbox-driven roadmap for implementing ArtSwap
 
 ### 8.1 Enhanced Voting System
 - [ ] Implement initial voting logic in `app/lib/db/vote.ts` (Tinder-style sequential voting)
-- [ ] Add vote validation (prevent self-voting, duplicate votes, finalized vote modification)
+- [ ] Add vote validation (prevent self-voting, duplicate votes, modification after finalizedAt is set)
 - [ ] Add vote recording with event phase checking
 - [ ] Implement preference order management functions
 - [ ] Add vote modification logic (change liked/disliked status before finalization)
 - [ ] Implement drag-and-drop reordering logic for preference order
-- [ ] Add vote finalization logic (lock all votes for user/event)
+- [ ] Add vote finalization logic (set finalizedAt timestamp for all user/event votes)
 - [ ] Implement vote retrieval for summary page with preference ordering
-- [ ] Add vote statistics calculation including preference metrics
+- [ ] Add vote statistics calculation including preference metrics and finalization timestamps
 
 ### 8.2 Preference-Based Matching Algorithm
 - [ ] Implement preference-based mutual like detection in `app/lib/db/match.ts`
@@ -262,7 +262,7 @@ This guide provides a detailed, checkbox-driven roadmap for implementing ArtSwap
 - [ ] Implement enhanced tie-breaking rules (preference score → individual preference → timing)
 - [ ] Add preference-aware match statistics and reporting
 - [ ] Implement match notification triggering with preference context
-- [ ] Add match validation to ensure only finalized votes are considered
+- [ ] Add match validation to ensure only votes with finalizedAt timestamp are considered
 
 ### 8.3 Event Phase Management
 - [ ] Create `app/lib/events/phases.ts` with phase transition logic
@@ -334,12 +334,13 @@ This guide provides a detailed, checkbox-driven roadmap for implementing ArtSwap
   - [ ] Test sequential voting (Tinder-style)
   - [ ] Test preference order assignment and reordering
   - [ ] Test vote modification before finalization
-  - [ ] Test vote finalization locking
-  - [ ] Test validation rules (no self-voting, no modification after finalization)
+  - [ ] Test vote finalization with timestamp setting
+  - [ ] Test validation rules (no self-voting, no modification after finalizedAt is set)
+  - [ ] Test finalization timestamp accuracy and immutability
 - [ ] Write tests for `app/lib/db/match.ts` preference-based matching algorithm
   - [ ] Test mutual preference scoring
   - [ ] Test tie-breaking rules
-  - [ ] Test match creation with finalized votes only
+  - [ ] Test match creation with votes that have finalizedAt timestamp only
 
 ### 10.3 Authentication Tests
 - [ ] Write tests for password hashing and verification
