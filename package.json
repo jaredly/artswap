@@ -12,7 +12,8 @@
     "lint": "biome check . --fix",
     "email:dev": "email dev --dir app/lib/email/templates",
     "email:export": "email export --dir app/lib/email/templates --out ./email-previews",
-    "test": "vitest run"
+    "test": "vitest run",
+    "db:seed": "tsx app/lib/db/seed.ts"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
@@ -56,6 +57,7 @@
     "playwright": "^1.54.1",
     "prisma": "^6.12.0",
     "tailwindcss": "^4.1.4",
+    "tsx": "^4.20.3",
     "typescript": "^5.8.3",
     "vite": "^6.3.3",
     "vite-tsconfig-paths": "^5.1.4",
