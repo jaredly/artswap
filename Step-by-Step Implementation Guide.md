@@ -71,10 +71,10 @@ This guide provides a detailed, checkbox-driven roadmap for implementing ArtSwap
 - [x] Run `npx prisma generate` to generate Prisma client
 
 ### 2.2 Database Utilities Setup
-- [ ] Create `app/lib/db/index.ts` file with Prisma client singleton
-- [ ] Create `app/lib/db/seed.ts` with sample data for development
-- [ ] Add seed script to package.json: `"db:seed": "tsx app/lib/db/seed.ts"`
-- [ ] Run seed script: `pnpm db:seed`
+- [x] Create `app/lib/db/index.ts` file with Prisma client singleton
+- [x] Create `app/lib/db/seed.ts` with sample data for development
+- [x] Add seed script to package.json: `"db:seed": "tsx app/lib/db/seed.ts"`
+- [x] Run seed script: `pnpm db:seed`
 
 ### 2.3 Database Access Layer
 - [ ] Create `app/lib/db/artist.ts` with CRUD functions for Artist model
