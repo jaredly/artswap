@@ -3,26 +3,68 @@ import prisma from './index';
 
 // Example seed data for Artist, Group, Event, Artwork
 async function main() {
-    await prisma.artist.createMany({
-        data: [
-            {name: 'Alice', bio: 'Painter from Denver'},
-            {name: 'Bob', bio: 'Sculptor from NYC'},
-        ],
+    // Create Artists
+    const alice = await prisma.artist.create({
+        data: {
+            email: 'alice@example.com',
+            passwordHash: 'hashedpassword1',
+            fullName: 'Alice Painter',
+            role: 'USER',
+            status: 'ACTIVE',
+        },
     });
 
-    await prisma.group.createMany({
-        data: [{name: 'Modernists'}, {name: 'Impressionists'}],
+    const bob = await prisma.artist.create({
+        data: {
+            email: 'bob@example.com',
+            passwordHash: 'hashedpassword2',
+            fullName: 'Bob Sculptor',
+            role: 'USER',
+            status: 'ACTIVE',
+        },
     });
 
-    await prisma.event.createMany({
-        data: [{name: 'Spring Exhibition', description: 'Annual spring art event'}],
+    // Create Groups
+    const modernists = await prisma.group.create({
+        data: {
+            name: 'Modernists',
+        },
     });
 
-    await prisma.artwork.createMany({
-        data: [
-            {title: 'Sunset', artistId: 1, eventId: 1},
-            {title: 'Mountain', artistId: 2, eventId: 1},
-        ],
+    const impressionists = await prisma.group.create({
+        data: {
+            name: 'Impressionists',
+        },
+    });
+
+    // Create Event
+    const event = await prisma.event.create({
+        data: {
+            groupId: modernists.id,
+            phase: 'open',
+            submissionLimit: 5,
+        },
+    });
+
+    // Create Artworks
+    await prisma.artwork.create({
+        data: {
+            title: 'Sunset',
+            artistId: alice.id,
+            eventId: event.id,
+            status: 'EVENT',
+            images: [],
+        },
+    });
+
+    await prisma.artwork.create({
+        data: {
+            title: 'Mountain',
+            artistId: bob.id,
+            eventId: event.id,
+            status: 'EVENT',
+            images: [],
+        },
     });
 }
 
