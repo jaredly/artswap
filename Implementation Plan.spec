@@ -7,9 +7,9 @@ This plan outlines the steps, milestones, and deliverables for building the ArtS
 
 ## 1. Project Setup
 - Initialize a single repo for the full-stack app (React + server code)
-    - use `npx create-react-router@latest my-react-router-app`
+    - use `npx create-react-router@latest .`
 - Set up code formatting and linting with Biome:
-    - Install Biome: `npm install --save-dev @biomejs/biome`
+    - Install Biome: `pnpm install --save-dev @biomejs/biome`
     - Initialize Biome config: `npx biome init`
     - Add Biome scripts to `package.json` for formatting and linting
     - Configure editor integration (VS Code extension recommended)
