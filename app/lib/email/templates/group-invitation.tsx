@@ -12,7 +12,7 @@ interface GroupInvitationProps {
     expirationDate: string;
 }
 
-export default function GroupInvitationEmail({inviteeName, inviterName, groupName, joinUrl, expirationDate}: GroupInvitationProps) {
+function GroupInvitationEmail({inviteeName, inviterName, groupName, joinUrl, expirationDate}: GroupInvitationProps) {
     return (
         <Html>
             <Head />
@@ -42,3 +42,13 @@ export default function GroupInvitationEmail({inviteeName, inviterName, groupNam
         </Html>
     );
 }
+
+GroupInvitationEmail.PreviewProps = {
+    inviteeName: 'Alex Painter',
+    inviterName: 'Jamie Curator',
+    groupName: 'Downtown Artists',
+    joinUrl: 'https://artswap.com/invite?token=group456',
+    expirationDate: '2025-08-01',
+};
+
+export default GroupInvitationEmail;

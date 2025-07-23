@@ -9,7 +9,7 @@ interface WelcomeEmailProps {
     verificationUrl: string;
 }
 
-export default function WelcomeEmail({artistName, verificationUrl}: WelcomeEmailProps) {
+function WelcomeEmail({artistName, verificationUrl}: WelcomeEmailProps) {
     return (
         <Html>
             <Head />
@@ -38,3 +38,10 @@ export default function WelcomeEmail({artistName, verificationUrl}: WelcomeEmail
         </Html>
     );
 }
+
+WelcomeEmail.PreviewProps = {
+    artistName: 'Alex Painter',
+    verificationUrl: 'https://artswap.com/verify?token=abc123',
+};
+
+export default WelcomeEmail;

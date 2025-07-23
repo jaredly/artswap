@@ -10,7 +10,7 @@ interface PasswordResetProps {
     expirationTime: string;
 }
 
-export default function PasswordResetEmail({artistName, resetUrl, expirationTime}: PasswordResetProps) {
+function PasswordResetEmail({artistName, resetUrl, expirationTime}: PasswordResetProps) {
     return (
         <Html>
             <Head />
@@ -42,3 +42,11 @@ export default function PasswordResetEmail({artistName, resetUrl, expirationTime
         </Html>
     );
 }
+
+PasswordResetEmail.PreviewProps = {
+    artistName: 'Alex Painter',
+    resetUrl: 'https://artswap.com/reset?token=xyz789',
+    expirationTime: '1 hour',
+};
+
+export default PasswordResetEmail;

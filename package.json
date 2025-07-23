@@ -43,6 +43,7 @@
     },
     "devDependencies": {
         "@biomejs/biome": "^2.1.2",
+        "@react-email/preview-server": "4.2.3",
         "@react-email/tailwind": "^1.2.2",
         "@react-router/dev": "^7.7.0",
         "@tailwindcss/vite": "^4.1.4",
@@ -65,5 +66,12 @@
         "vite": "^6.3.3",
         "vite-tsconfig-paths": "^5.1.4",
         "vitest": "^3.2.4"
+    },
+    "packageManager": "pnpm@10.2.1+sha1.48adf39a4ab751eda7b73b99447d1f0b6d227e02",
+    "pnpm": {
+        "onlyBuiltDependencies": [
+            "esbuild",
+            "sharp"
+        ]
     }
 }

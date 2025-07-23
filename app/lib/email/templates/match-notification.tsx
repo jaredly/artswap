@@ -14,7 +14,7 @@ interface MatchNotificationProps {
     viewMatchUrl: string;
 }
 
-export default function MatchNotification({
+function MatchNotification({
     artistName,
     matchedArtworkTitle,
     matchedArtworkImage,
@@ -68,3 +68,15 @@ export default function MatchNotification({
         </Html>
     );
 }
+
+MatchNotification.PreviewProps = {
+    artistName: 'Alex Painter',
+    matchedArtworkTitle: 'Sunset Over Water',
+    matchedArtworkImage: 'https://artswap.com/images/artwork2.jpg',
+    yourArtworkTitle: 'City Lights',
+    yourArtworkImage: 'https://artswap.com/images/artwork1.jpg',
+    eventName: 'July Art Swap',
+    viewMatchUrl: 'https://artswap.com/matches/123',
+};
+
+export default MatchNotification;

@@ -13,7 +13,7 @@ interface EventPhaseChangeProps {
     actionText: string;
 }
 
-export default function EventPhaseChangeEmail({artistName, eventName, oldPhase, newPhase, actionUrl, actionText}: EventPhaseChangeProps) {
+function EventPhaseChangeEmail({artistName, eventName, oldPhase, newPhase, actionUrl, actionText}: EventPhaseChangeProps) {
     return (
         <Html>
             <Head />
@@ -44,3 +44,14 @@ export default function EventPhaseChangeEmail({artistName, eventName, oldPhase, 
         </Html>
     );
 }
+
+EventPhaseChangeEmail.PreviewProps = {
+    artistName: 'Alex Painter',
+    eventName: 'July Art Swap',
+    oldPhase: 'submission',
+    newPhase: 'voting',
+    actionUrl: 'https://artswap.com/events/789',
+    actionText: 'Go to Event',
+};
+
+export default EventPhaseChangeEmail;

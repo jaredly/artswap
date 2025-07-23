@@ -10,7 +10,7 @@ interface VerificationEmailProps {
     expirationTime: string;
 }
 
-export default function VerificationEmail({artistName, verificationUrl, expirationTime}: VerificationEmailProps) {
+function VerificationEmail({artistName, verificationUrl, expirationTime}: VerificationEmailProps) {
     return (
         <Html>
             <Head />
@@ -38,3 +38,11 @@ export default function VerificationEmail({artistName, verificationUrl, expirati
         </Html>
     );
 }
+
+VerificationEmail.PreviewProps = {
+    artistName: 'Alex Painter',
+    verificationUrl: 'https://artswap.com/verify?token=abc123',
+    expirationTime: '24 hours',
+};
+
+export default VerificationEmail;
