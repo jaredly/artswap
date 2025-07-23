@@ -1,7 +1,6 @@
 {
     "name": "art2",
     "private": true,
-    "type": "module",
     "scripts": {
         "build": "react-router build",
         "dev": "react-router dev",
@@ -11,7 +10,6 @@
         "format": "biome format . --fix",
         "lint": "biome check . --fix",
         "email:dev": "email dev --dir app/lib/email/templates",
-        "email:export": "email export --dir app/lib/email/templates --outDir ./email-previews",
         "test": "vitest run",
         "db:seed": "tsx app/lib/db/seed.ts"
     },
