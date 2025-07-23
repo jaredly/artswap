@@ -5,7 +5,7 @@ import {hashPassword, verifyPassword} from './password';
 describe('password utils', () => {
     it('hashes and verifies a password', async () => {
         const password = 'SuperSecret123!';
-        const hash = await hashPassword(password);
+        const hash = await hashPassword(password, 1);
         expect(hash).toBeTypeOf('string');
         expect(hash.length).toBeGreaterThan(10);
 

@@ -28,8 +28,8 @@ describe('session utils', () => {
     });
 
     it('returns null for missing cookie', () => {
-        expect(getSessionUserId(null)).toBeNull();
-        expect(getSessionUserId('')).toBeNull();
+        expect(getSessionUserId(null, secret)).toBeNull();
+        expect(getSessionUserId('', secret)).toBeNull();
     });
 
     it('destroys session cookie', () => {

@@ -6,8 +6,8 @@ const BCRYPT_ROUNDS = Number(process.env.BCRYPT_ROUNDS) || 12;
 /**
  * Hash a plain text password using bcrypt.
  */
-export async function hashPassword(password: string): Promise<string> {
-    return bcrypt.hash(password, BCRYPT_ROUNDS);
+export async function hashPassword(password: string, roundsOverride = BCRYPT_ROUNDS): Promise<string> {
+    return bcrypt.hash(password, roundsOverride);
 }
 
 /**

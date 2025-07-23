@@ -1,6 +1,4 @@
 // app/lib/auth/guards.test.ts
-process.env.SESSION_SECRET = 'test-session-secret';
-process.env.JWT_SECRET = 'test-jwt-secret';
 import {describe, it, expect, vi, beforeEach} from 'vitest';
 import * as session from './session';
 import * as tokens from './tokens';
