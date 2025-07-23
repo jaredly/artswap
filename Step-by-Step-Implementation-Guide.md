@@ -90,11 +90,11 @@ This guide provides a detailed, checkbox-driven roadmap for implementing ArtSwap
 ## Phase 3: Authentication & Security
 
 ### 3.1 Authentication Utilities
-- [ ] Create `app/lib/auth/password.ts` with bcrypt hashing functions
-- [ ] Create `app/lib/auth/session.ts` with session management
-- [ ] Create `app/lib/auth/tokens.ts` with JWT and verification token utilities
-- [ ] Create `app/lib/auth/guards.ts` with authentication guards for routes
-- [ ] Create `app/lib/auth/index.ts` exporting all auth utilities
+- [x] Create `app/lib/auth/password.ts` with bcrypt hashing functions
+- [x] Create `app/lib/auth/session.ts` with session management
+- [x] Create `app/lib/auth/tokens.ts` with JWT and verification token utilities
+- [x] Create `app/lib/auth/guards.ts` with authentication guards for routes
+- [x] Create `app/lib/auth/index.ts` exporting all auth utilities
 
 ### 3.2 Validation Schemas
 - [ ] Create `app/lib/validation/auth.ts` with login/signup schemas
