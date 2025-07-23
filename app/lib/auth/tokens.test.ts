@@ -1,6 +1,6 @@
 // app/lib/auth/tokens.test.ts
-import {describe, it, expect} from 'vitest';
-import {createJWT, verifyJWT, generateVerificationToken} from './tokens';
+import {describe, expect, it} from 'vitest';
+import {createJWT, generateVerificationToken, verifyJWT} from './tokens';
 
 describe('tokens utils', () => {
     const secret = 'test-jwt-secret';

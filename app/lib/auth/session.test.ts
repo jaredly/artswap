@@ -1,6 +1,6 @@
 // app/lib/auth/session.test.ts
-import {describe, it, expect} from 'vitest';
-import {createSessionCookie, getSessionUserId, destroySessionCookie} from './session';
+import {describe, expect, it} from 'vitest';
+import {createSessionCookie, destroySessionCookie, getSessionUserId} from './session';
 
 describe('session utils', () => {
     const userId = 'user-123';

@@ -1,6 +1,7 @@
 // app/lib/db/event.ts
-import prisma from './index';
+
 import type {Event, Prisma} from '../../../generated/prisma/client';
+import prisma from './index';
 
 // Create a new event
 export async function createEvent(data: {groupId: string; phase: string; submissionLimit: number}): Promise<Event> {

@@ -1,6 +1,7 @@
 // app/lib/db/group.ts
-import prisma from './index';
+
 import type {Group, Prisma} from '../../../generated/prisma/client';
+import prisma from './index';
 
 // Create a new group
 export async function createGroup(data: {name: string}): Promise<Group> {

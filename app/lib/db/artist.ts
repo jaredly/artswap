@@ -1,6 +1,7 @@
 // app/lib/db/artist.ts
-import prisma from './index';
+
 import type {Artist, Prisma} from '../../../generated/prisma/client';
+import prisma from './index';
 
 // Create a new artist
 export async function createArtist(data: {

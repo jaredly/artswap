@@ -1,7 +1,7 @@
 // app/lib/permissions/guards.ts
 
 import type {Artist} from './roles';
-import {isSuperAdmin, isGroupAdmin, canManageEvent, canInviteToGroup, canRemoveUser, canChangeEventPhase} from './roles';
+import {canChangeEventPhase, canInviteToGroup, canManageEvent, canRemoveUser, isGroupAdmin, isSuperAdmin} from './roles';
 
 // Custom error for unauthorized access
 export class AuthorizationError extends Error {

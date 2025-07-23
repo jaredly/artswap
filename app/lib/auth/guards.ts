@@ -1,7 +1,8 @@
 // app/lib/auth/guards.ts
+
+import db from '../db';
 import {getSessionUserId} from './session';
 import {verifyJWT} from './tokens';
-import db from '../db';
 
 export async function requireAuth(request: Request) {
     const cookie = request.headers.get('cookie');

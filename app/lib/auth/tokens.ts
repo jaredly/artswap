@@ -1,6 +1,7 @@
 // app/lib/auth/tokens.ts
-import jwt from 'jsonwebtoken';
+
 import {randomBytes} from 'crypto';
+import jwt from 'jsonwebtoken';
 
 const JWT_EXPIRES_IN = '7d'; // Default: 7 days
 

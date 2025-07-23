@@ -1,6 +1,7 @@
 // app/lib/db/match.ts
-import prisma from './index';
+
 import type {Match, Prisma} from '../../../generated/prisma/client';
+import prisma from './index';
 
 // Create a new match
 export async function createMatch(data: {eventId: string; artwork1Id: string; artwork2Id: string; status: string}): Promise<Match> {

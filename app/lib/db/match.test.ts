@@ -1,11 +1,11 @@
 // app/lib/db/match.test.ts
-import {describe, it, expect, beforeEach, afterEach} from 'vitest';
+import {afterEach, beforeEach, describe, expect, it} from 'vitest';
+import {createArtist} from './artist';
+import {createArtwork} from './artwork';
+import {createEvent} from './event';
+import {createGroup} from './group';
 import prisma from './index';
 import {calculateMatches, createMatch} from './match';
-import {createArtist} from './artist';
-import {createGroup} from './group';
-import {createEvent} from './event';
-import {createArtwork} from './artwork';
 import {createVote} from './vote';
 
 // Utility to clear DB between tests

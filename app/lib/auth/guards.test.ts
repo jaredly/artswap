@@ -1,9 +1,9 @@
 // app/lib/auth/guards.test.ts
-import {describe, it, expect, vi, beforeEach} from 'vitest';
+import {beforeEach, describe, expect, it, vi} from 'vitest';
+import db from '../db';
+import {optionalAuth, requireAuth} from './guards';
 import * as session from './session';
 import * as tokens from './tokens';
-import db from '../db';
-import {requireAuth, optionalAuth} from './guards';
 
 vi.mock('./session');
 vi.mock('./tokens');

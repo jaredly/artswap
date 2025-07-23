@@ -1,6 +1,7 @@
 // app/lib/db/vote.ts
+
+import type {Prisma, Vote} from '../../../generated/prisma/client';
 import prisma from './index';
-import type {Vote, Prisma} from '../../../generated/prisma/client';
 
 // Create a new vote
 export async function createVote(data: {

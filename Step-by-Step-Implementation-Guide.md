@@ -104,22 +104,22 @@ This guide provides a detailed, checkbox-driven roadmap for implementing ArtSwap
 - [x] Create `app/lib/validation/index.ts` exporting all schemas
 
 ### 3.3 Permission System
-- [ ] Create `app/lib/permissions/roles.ts` with role definitions and checks
-- [ ] Create `app/lib/permissions/guards.ts` with authorization guard functions
-- [ ] Create `app/lib/permissions/context.ts` with AuthContext interface
-- [ ] Create `app/lib/permissions/index.ts` exporting permission utilities
+- [x] Create `app/lib/permissions/roles.ts` with role definitions and checks
+- [x] Create `app/lib/permissions/guards.ts` with authorization guard functions
+- [x] Create `app/lib/permissions/context.ts` with AuthContext interface
+- [x] Create `app/lib/permissions/index.ts` exporting permission utilities
 
 ---
 
 ## Phase 4: File Upload & Image Processing
 
 ### 4.1 Image Processing Setup
-- [ ] Create `uploads/images/` directory structure (year/month/original/thumbnails/medium/large)
-- [ ] Create `app/lib/image/config.ts` with image configuration constants
-- [ ] Create `app/lib/image/process.ts` with Sharp image processing functions
-- [ ] Create `app/lib/image/upload.ts` with file upload handling
-- [ ] Create `app/lib/image/validate.ts` with file validation functions
-- [ ] Create `app/lib/image/index.ts` exporting image utilities
+- [x] Create `uploads/images/` directory structure (year/month/original/thumbnails/medium/large)
+- [x] Create `app/lib/image/config.ts` with image configuration constants
+- [x] Create `app/lib/image/process.ts` with Sharp image processing functions
+- [x] Create `app/lib/image/upload.ts` with file upload handling
+- [x] Create `app/lib/image/validate.ts` with file validation functions
+- [x] Create `app/lib/image/index.ts` exporting image utilities
 
 ### 4.2 File Upload Route
 - [ ] Create `app/routes/api.upload.ts` with image upload API endpoint

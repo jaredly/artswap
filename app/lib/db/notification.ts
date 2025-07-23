@@ -1,6 +1,7 @@
 // app/lib/db/notification.ts
-import prisma from './index';
+
 import type {Notification, Prisma} from '../../../generated/prisma/client';
+import prisma from './index';
 
 // Create a new notification
 export async function createNotification(data: {
