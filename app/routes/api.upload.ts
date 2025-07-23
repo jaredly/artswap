@@ -6,6 +6,7 @@ import {IMAGE_CONFIG} from '~/lib/image/config';
 import db from '~/lib/db';
 import winston from 'winston';
 import {ZodError} from 'zod';
+import sharp, {type Metadata} from 'sharp';
 
 /* Rate limiting removed: install and configure a rate limiter for production */
 
@@ -63,28 +64,78 @@ export async function action({request}: ActionFunctionArgs) {
         // Read file buffer
         let buffer = Buffer.from(await file.arrayBuffer());
 
-        // If file size or dimensions are too large, scale down before further processing
-        let needsResize = false;
-        if (!validateImageSize(file.size)) {
-            needsResize = true;
-        } else {
-            const validDimensions = await validateImageDimensions(buffer);
-            if (!validDimensions) {
-                needsResize = true;
-            }
+        // If dimensions are too large, resize to max dimensions
+        let metadata: Metadata;
+        try {
+            metadata = await sharp(buffer).metadata();
+        } catch (err) {
+            logger.error('Failed to read image metadata', {error: err});
+            return new Response(
+                JSON.stringify({
+                    success: false,
+                    error: {code: 'METADATA_FAILED', message: 'Could not read image metadata'},
+                }),
+                {status: 500, headers: {'Content-Type': 'application/json'}},
+            );
         }
 
-        if (needsResize) {
+        if (
+            metadata.width &&
+            metadata.height &&
+            (metadata.width > IMAGE_CONFIG.maxDimensions.width || metadata.height > IMAGE_CONFIG.maxDimensions.height)
+        ) {
             try {
-                const sharp = (await import('sharp')).default;
                 buffer = await sharp(buffer).resize(IMAGE_CONFIG.maxDimensions).toBuffer();
-                logger.info('Image was too large and has been scaled down');
+                logger.info('Image dimensions were too large and have been scaled down');
             } catch (err) {
                 logger.error('Failed to scale down image', {error: err});
                 return new Response(
                     JSON.stringify({
                         success: false,
                         error: {code: 'RESIZE_FAILED', message: 'Could not scale down image'},
+                    }),
+                    {status: 500, headers: {'Content-Type': 'application/json'}},
+                );
+            }
+        }
+
+        // If file size is still too large, re-encode at lower quality
+        if (buffer.length > IMAGE_CONFIG.maxFileSize) {
+            try {
+                const format = file.type === 'image/png' ? 'png' : file.type === 'image/webp' ? 'webp' : 'jpeg';
+                let quality = format === 'jpeg' ? IMAGE_CONFIG.quality.jpeg : format === 'webp' ? IMAGE_CONFIG.quality.webp : undefined;
+                let s = sharp(buffer);
+                if (format === 'jpeg') s = s.jpeg({quality});
+                else if (format === 'webp') s = s.webp({quality});
+                else if (format === 'png') s = s.png();
+                buffer = await s.toBuffer();
+
+                // If still too large, try again with lower quality (down to 50)
+                while (buffer.length > IMAGE_CONFIG.maxFileSize && quality && quality > 50) {
+                    quality -= 10;
+                    let s2 = sharp(buffer);
+                    if (format === 'jpeg') s2 = s2.jpeg({quality});
+                    else if (format === 'webp') s2 = s2.webp({quality});
+                    buffer = await s2.toBuffer();
+                }
+
+                if (buffer.length > IMAGE_CONFIG.maxFileSize) {
+                    logger.warn('Image could not be reduced below max file size');
+                    return new Response(
+                        JSON.stringify({
+                            success: false,
+                            error: {code: 'FILE_TOO_LARGE', message: 'Image could not be reduced below max file size'},
+                        }),
+                        {status: 400, headers: {'Content-Type': 'application/json'}},
+                    );
+                }
+                logger.info('Image was re-encoded to reduce file size');
+            } catch (err) {
+                logger.error('Failed to re-encode image', {error: err});
+                return new Response(
+                    JSON.stringify({
+                        success: false,
+                        error: {code: 'REENCODE_FAILED', message: 'Could not reduce image file size'},
                     }),
                     {status: 500, headers: {'Content-Type': 'application/json'}},
                 );
