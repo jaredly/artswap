@@ -97,11 +97,11 @@ This guide provides a detailed, checkbox-driven roadmap for implementing ArtSwap
 - [x] Create `app/lib/auth/index.ts` exporting all auth utilities
 
 ### 3.2 Validation Schemas
-- [ ] Create `app/lib/validation/auth.ts` with login/signup schemas
-- [ ] Create `app/lib/validation/artwork.ts` with artwork validation schemas
-- [ ] Create `app/lib/validation/group.ts` with group management schemas
-- [ ] Create `app/lib/validation/event.ts` with event management schemas
-- [ ] Create `app/lib/validation/index.ts` exporting all schemas
+- [x] Create `app/lib/validation/auth.ts` with login/signup schemas
+- [x] Create `app/lib/validation/artwork.ts` with artwork validation schemas
+- [x] Create `app/lib/validation/group.ts` with group management schemas
+- [x] Create `app/lib/validation/event.ts` with event management schemas
+- [x] Create `app/lib/validation/index.ts` exporting all schemas
 
 ### 3.3 Permission System
 - [ ] Create `app/lib/permissions/roles.ts` with role definitions and checks
