@@ -132,15 +132,15 @@ This guide provides a detailed, checkbox-driven roadmap for implementing ArtSwap
 ## Phase 5: Email System
 
 ### 5.1 Email Templates
-- [ ] Create `app/lib/email/components/email-layout.tsx` with base email layout
-- [ ] Create `app/lib/email/components/button.tsx` with email button component
-- [ ] Create `app/lib/email/components/artwork-card.tsx` with artwork display component
-- [ ] Create `app/lib/email/templates/welcome.tsx` with welcome email template
-- [ ] Create `app/lib/email/templates/verify-email.tsx` with verification email
-- [ ] Create `app/lib/email/templates/password-reset.tsx` with reset email
-- [ ] Create `app/lib/email/templates/group-invitation.tsx` with invitation email
-- [ ] Create `app/lib/email/templates/match-notification.tsx` with match email
-- [ ] Create `app/lib/email/templates/event-phase-change.tsx` with phase change email
+- [x] Create `app/lib/email/components/email-layout.tsx` with base email layout
+- [x] Create `app/lib/email/components/button.tsx` with email button component
+- [x] Create `app/lib/email/components/artwork-card.tsx` with artwork display component
+- [x] Create `app/lib/email/templates/welcome.tsx` with welcome email template
+- [x] Create `app/lib/email/templates/verify-email.tsx` with verification email
+- [x] Create `app/lib/email/templates/password-reset.tsx` with reset email
+- [x] Create `app/lib/email/templates/group-invitation.tsx` with invitation email
+- [x] Create `app/lib/email/templates/match-notification.tsx` with match email
+- [x] Create `app/lib/email/templates/event-phase-change.tsx` with phase change email
 
 ### 5.2 Email Service
 - [ ] Create `app/lib/email/types.ts` with email prop interfaces

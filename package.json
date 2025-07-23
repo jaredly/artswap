@@ -11,7 +11,7 @@
         "format": "biome format . --fix",
         "lint": "biome check . --fix",
         "email:dev": "email dev --dir app/lib/email/templates",
-        "email:export": "email export --dir app/lib/email/templates --out ./email-previews",
+        "email:export": "email export --dir app/lib/email/templates --outDir ./email-previews",
         "test": "vitest run",
         "db:seed": "tsx app/lib/db/seed.ts"
     },
@@ -33,6 +33,7 @@
         "mime-types": "^3.0.1",
         "react": "^19.1.0",
         "react-dom": "^19.1.0",
+        "react-email": "^4.2.3",
         "react-router": "^7.7.0",
         "sharp": "^0.34.3",
         "sqlite3": "^5.1.7",
