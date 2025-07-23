@@ -122,10 +122,10 @@ This guide provides a detailed, checkbox-driven roadmap for implementing ArtSwap
 - [x] Create `app/lib/image/index.ts` exporting image utilities
 
 ### 4.2 File Upload Route
-- [ ] Create `app/routes/api.upload.ts` with image upload API endpoint
-- [ ] Implement file validation, processing, and storage
-- [ ] Add rate limiting for upload endpoint
-- [ ] Add error handling and logging
+- [x] Create `app/routes/api.upload.ts` with image upload API endpoint
+- [x] Implement file validation, processing, and storage
+- [x] Add rate limiting for upload endpoint
+- [x] Add error handling and logging
 
 ---
 
