@@ -622,6 +622,17 @@ const CreateArtworkSchema = z.object({
   year: z.number().int().min(1800).max(new Date().getFullYear()),
   images: z.array(z.string()).min(1).max(10)
 });
+
+const CreateEventSchema = z.object({
+  groupId: z.string().uuid(),
+  submissionLimit: z.number().int().min(1).max(100),
+  matchingAlgorithm: z.enum([
+    'FIRST_COME_FIRST_SERVED',
+    'OPTIMAL_MATCHING',
+    'PREFERENCE_WEIGHTED',
+    'RANDOM_MATCHING'
+  ])
+});
 ```
 
 ### Security Headers
@@ -776,59 +787,301 @@ interface VoteFinalization {
 // - Provides audit trail of when votes were locked
 ```
 
-### Voting Finalization
+### Event Phase Transitions & Matching
 
-When transitioning from VOTING to CLOSED:
-1. Auto-finalize any unfinalized votes (set finalizedAt to current timestamp)
-2. Calculate mutual likes using preference order for tie-breaking
-3. Create Match records prioritizing higher preference matches
-4. Send match notifications
-5. Lock all votes (finalizedAt prevents further changes)
-6. Update event phase
-7. Log transition in audit log with finalization timestamps
+#### During VOTING Phase
+```typescript
+// When a user finalizes their votes
+async function finalizeVotes(eventId: string, artistId: string) {
+  // 1. Set finalizedAt timestamp for all user's votes in this event
+  await db.vote.updateMany({
+    where: { eventId, artistId, finalizedAt: null },
+    data: { finalizedAt: new Date() }
+  });
+
+  // 2. Check if matching should be triggered
+  await handleVoteFinalization(eventId, artistId);
+}
+```
+
+#### Transitioning from VOTING to CLOSED
+```typescript
+async function closeEvent(eventId: string) {
+  const event = await db.event.findUnique({ where: { id: eventId } });
+
+  // 1. Auto-finalize any unfinalized votes
+  await db.vote.updateMany({
+    where: { eventId, finalizedAt: null },
+    data: { finalizedAt: new Date() }
+  });
+
+  // 2. Trigger matching for non-greedy algorithms (if not already triggered)
+  if (!event.matchingTriggered) {
+    const algorithm = getAlgorithmInstance(event.matchingAlgorithm);
+    if (!algorithm.isGreedy) {
+      await triggerMatchingProcess(eventId);
+    }
+  }
+
+  // 3. Update event phase
+  await db.event.update({
+    where: { id: eventId },
+    data: { phase: 'closed' }
+  });
+
+  // 4. Log transition in audit log
+  await createAuditLog({
+    action: 'TRANSITION_EVENT_PHASE',
+    targetType: 'EVENT',
+    targetId: eventId,
+    details: { from: 'voting', to: 'closed', algorithm: event.matchingAlgorithm }
+  });
+}
 
 ---
 
-## 8. Matching Algorithm Specification
+## 8. Matching Algorithm System
 
-### Preference-Based Matching Algorithm
+### Algorithm Types Overview
+
+```typescript
+enum MatchingAlgorithm {
+  FIRST_COME_FIRST_SERVED = "first_come_first_served",    // Greedy
+  OPTIMAL_MATCHING = "optimal_matching",                   // Non-greedy
+  PREFERENCE_WEIGHTED = "preference_weighted",             // Non-greedy
+  RANDOM_MATCHING = "random_matching"                      // Non-greedy
+}
+
+interface AlgorithmConfig {
+  type: MatchingAlgorithm;
+  isGreedy: boolean;
+  description: string;
+  requiresAllVotes: boolean;
+}
+
+const ALGORITHM_CONFIGS: Record<MatchingAlgorithm, AlgorithmConfig> = {
+  [MatchingAlgorithm.FIRST_COME_FIRST_SERVED]: {
+    type: MatchingAlgorithm.FIRST_COME_FIRST_SERVED,
+    isGreedy: true,
+    description: "Creates matches immediately as votes are finalized",
+    requiresAllVotes: false
+  },
+  [MatchingAlgorithm.OPTIMAL_MATCHING]: {
+    type: MatchingAlgorithm.OPTIMAL_MATCHING,
+    isGreedy: false,
+    description: "Waits for all votes, then creates optimal stable matching",
+    requiresAllVotes: true
+  },
+  [MatchingAlgorithm.PREFERENCE_WEIGHTED]: {
+    type: MatchingAlgorithm.PREFERENCE_WEIGHTED,
+    isGreedy: false,
+    description: "Waits for all votes, prioritizes mutual high preferences",
+    requiresAllVotes: true
+  },
+  [MatchingAlgorithm.RANDOM_MATCHING]: {
+    type: MatchingAlgorithm.RANDOM_MATCHING,
+    isGreedy: false,
+    description: "Waits for all votes, randomly assigns mutual likes",
+    requiresAllVotes: true
+  }
+};
+```
+
+### Base Matching Algorithm Interface
+
+```typescript
+interface MatchingAlgorithmBase {
+  name: MatchingAlgorithm;
+  isGreedy: boolean;
+
+  // For greedy algorithms: called when a user finalizes votes
+  onVotesFinalized?(eventId: string, artistId: string): Promise<MatchingResult>;
+
+  // For non-greedy algorithms: called when event transitions to CLOSED
+  calculateAllMatches(eventId: string): Promise<MatchingResult>;
+
+  // Check if algorithm can run (e.g., all votes finalized for non-greedy)
+  canCalculateMatches(eventId: string): Promise<boolean>;
+}
+```
+
+### Individual Algorithm Implementations
+
+#### 1. First Come First Served (Greedy)
+
+```typescript
+class FirstComeFirstServedAlgorithm implements MatchingAlgorithmBase {
+  name = MatchingAlgorithm.FIRST_COME_FIRST_SERVED;
+  isGreedy = true;
+
+  async onVotesFinalized(eventId: string, artistId: string): Promise<MatchingResult> {
+    // 1. Get all liked artworks by this artist
+    // 2. Check for any existing mutual likes with already-finalized votes
+    // 3. Create matches immediately for any mutual likes found
+    // 4. Return partial matching result
+  }
+
+  async calculateAllMatches(eventId: string): Promise<MatchingResult> {
+    // Called during event closure to catch any remaining unmatched votes
+    // Same logic as onVotesFinalized but for all remaining unmatched artworks
+  }
+}
+```
+
+#### 2. Optimal Matching (Non-Greedy)
+
+```typescript
+class OptimalMatchingAlgorithm implements MatchingAlgorithmBase {
+  name = MatchingAlgorithm.OPTIMAL_MATCHING;
+  isGreedy = false;
+
+  async calculateAllMatches(eventId: string): Promise<MatchingResult> {
+    // 1. Wait for all participants to finalize votes
+    // 2. Build preference matrix for all artists
+    // 3. Use Gale-Shapley algorithm for stable matching
+    // 4. Maximize overall satisfaction scores
+  }
+
+  async canCalculateMatches(eventId: string): Promise<boolean> {
+    // Returns true only when ALL participants have finalized votes
+    const allParticipants = await getEventParticipants(eventId);
+    const finalizedCount = await getFinalizedVotesCount(eventId);
+    return finalizedCount === allParticipants.length;
+  }
+}
+```
+
+#### 3. Preference Weighted (Non-Greedy)
+
+```typescript
+class PreferenceWeightedAlgorithm implements MatchingAlgorithmBase {
+  name = MatchingAlgorithm.PREFERENCE_WEIGHTED;
+  isGreedy = false;
+
+  async calculateAllMatches(eventId: string): Promise<MatchingResult> {
+    // 1. Get all finalized votes where liked = true
+    // 2. Calculate combined preference scores for mutual likes
+    // 3. Sort by preference score (lower = better)
+    // 4. Greedily assign matches starting with highest mutual preference
+    // 5. Remove matched artworks from consideration
+  }
+}
+```
+
+#### 4. Random Matching (Non-Greedy)
+
+```typescript
+class RandomMatchingAlgorithm implements MatchingAlgorithmBase {
+  name = MatchingAlgorithm.RANDOM_MATCHING;
+  isGreedy = false;
+
+  async calculateAllMatches(eventId: string): Promise<MatchingResult> {
+    // 1. Get all mutual likes (both artists liked each other's work)
+    // 2. Randomly shuffle the list of potential matches
+    // 3. Assign matches in random order
+    // 4. Remove matched artworks from further consideration
+  }
+}
+```
+
+### Common Matching Result Interface
 
 ```typescript
 interface MatchingResult {
   matches: Array<{
     artwork1Id: string;
     artwork2Id: string;
-    artist1PreferenceOrder: number;
-    artist2PreferenceOrder: number;
-    combinedScore: number; // Lower is better (sum of preference orders)
+    artist1PreferenceOrder?: number;
+    artist2PreferenceOrder?: number;
+    combinedScore?: number;
+    algorithm: MatchingAlgorithm;
+    createdAt: Date;
   }>;
   unmatched: string[]; // Artwork IDs with no matches
   statistics: {
     totalVotes: number;
     totalMatches: number;
     participationRate: number;
-    averagePreferenceScore: number;
+    averagePreferenceScore?: number;
+    algorithm: MatchingAlgorithm;
+    matchingTriggeredAt: Date;
   };
-}
-
-async function calculateMatches(eventId: string): Promise<MatchingResult> {
-  // 1. Get all votes for the event where finalizedAt is not null and liked = true
-  // 2. For each artwork pair, check if both artists liked each other's work
-  // 3. Calculate combined preference score (sum of both preference orders)
-  // 4. Sort potential matches by combined score (lower = more preferred)
-  // 5. Create matches starting with highest mutual preference
-  // 6. Remove matched artworks from further consideration
-  // 7. Return results with preference-based statistics and finalization timestamps
 }
 ```
 
-### Enhanced Matching Rules
+### Algorithm Selection & Triggering
 
-When creating matches, priority order:
-1. **Mutual Preference Score**: Sum of both artists' preference orders (lower = better)
-2. **Individual Preference**: If tied, prioritize matches where at least one artist ranked it #1
-3. **Vote Timing**: If still tied, earlier votes win (first-come-first-served)
-4. **Admin Override**: Manual match assignment always takes precedence
+#### Event Creation
+```typescript
+interface CreateEventRequest {
+  groupId: string;
+  submissionLimit: number;
+  matchingAlgorithm: MatchingAlgorithm; // Admin selects during event creation
+  // ... other fields
+}
+```
+
+#### Matching Trigger Logic
+```typescript
+async function handleVoteFinalization(eventId: string, artistId: string) {
+  const event = await db.event.findUnique({ where: { id: eventId } });
+  const algorithm = getAlgorithmInstance(event.matchingAlgorithm);
+
+  if (algorithm.isGreedy) {
+    // Greedy algorithms: trigger immediately
+    const result = await algorithm.onVotesFinalized(eventId, artistId);
+    await createMatches(result.matches);
+    await notifyMatches(result.matches);
+  } else {
+    // Non-greedy algorithms: check if ready to run
+    const canRun = await algorithm.canCalculateMatches(eventId);
+    if (canRun && !event.matchingTriggered) {
+      await triggerMatchingProcess(eventId);
+    }
+  }
+}
+
+async function triggerMatchingProcess(eventId: string) {
+  const event = await db.event.findUnique({ where: { id: eventId } });
+  const algorithm = getAlgorithmInstance(event.matchingAlgorithm);
+
+  // Mark as triggered to prevent duplicate runs
+  await db.event.update({
+    where: { id: eventId },
+    data: { matchingTriggered: true }
+  });
+
+  const result = await algorithm.calculateAllMatches(eventId);
+  await createMatches(result.matches);
+  await notifyMatches(result.matches);
+}
+```
+
+### Algorithm-Specific Rules
+
+#### First Come First Served
+- **Trigger**: Immediately when any user finalizes votes
+- **Logic**: Create matches for mutual likes as they become available
+- **Benefit**: Users get matches quickly
+- **Drawback**: May not find optimal overall matching
+
+#### Optimal Matching
+- **Trigger**: Only when ALL participants have finalized votes
+- **Logic**: Use stable matching algorithm (Gale-Shapley) for best overall result
+- **Benefit**: Mathematically optimal stable matching
+- **Drawback**: Users must wait for everyone to finish voting
+
+#### Preference Weighted
+- **Trigger**: When all participants finalized OR event transitions to CLOSED
+- **Logic**: Prioritize highest mutual preferences first
+- **Benefit**: Focuses on matches both artists really want
+- **Drawback**: Lower-preference mutual likes may not get matched
+
+#### Random Matching
+- **Trigger**: When all participants finalized OR event transitions to CLOSED
+- **Logic**: Randomly assign among all mutual likes
+- **Benefit**: Fair/unbiased, good for experimental events
+- **Drawback**: Ignores user preferences
 
 ---
 
@@ -877,6 +1130,8 @@ const ERROR_CODES = {
   EVENT_INVALID_PHASE: 'Invalid event phase for this action',
   ARTWORK_LIMIT_EXCEEDED: 'Submission limit exceeded',
   VOTE_ALREADY_CAST: 'Vote already cast for this artwork',
+  MATCHING_ALREADY_TRIGGERED: 'Matching has already been triggered for this event',
+  ALGORITHM_NOT_READY: 'Matching algorithm is not ready to run (waiting for more votes)',
 
   // System
   FILE_UPLOAD_FAILED: 'File upload failed',
@@ -896,6 +1151,13 @@ app/
 │   ├── db/                # Database layer & Prisma client
 │   ├── email/             # Email service & templates
 │   ├── image/             # Image processing utilities
+│   ├── matching/          # Matching algorithm implementations
+│   │   ├── base.ts        # Base interface
+│   │   ├── first-come-first-served.ts
+│   │   ├── optimal-matching.ts
+│   │   ├── preference-weighted.ts
+│   │   ├── random-matching.ts
+│   │   └── registry.ts    # Algorithm registry
 │   ├── validation/        # Zod schemas
 │   ├── permissions/       # Authorization logic
 │   └── utils/             # General utilities
@@ -1097,11 +1359,12 @@ const FloatingActions = {
 ```
 
 ### Single-Track User Flows
+
 ```typescript
-// Primary user journeys - focused and linear
+// Primary user journeys - varies by matching algorithm
 const UserFlows = {
   submitArtwork: [
-    '/events/:id',           // See event details
+    '/events/:id',           // See event details & algorithm type
     '/events/:id/submit',    // Submit artwork form
     '/portfolio'             // Confirmation & manage submissions
   ],
@@ -1117,9 +1380,36 @@ const UserFlows = {
     '/matches',              // Match notifications & history
     '/matches/:id',          // Individual match details
     '/events/:id'            // Back to event context
+  ],
+
+  // Algorithm-specific flows
+  greedyAlgorithmFlow: [
+    'Vote finalization',     // User finalizes votes
+    'Immediate matching',    // Matches created instantly if mutual likes exist
+    'Match notification'     // User gets notified right away
+  ],
+
+  nonGreedyAlgorithmFlow: [
+    'Vote finalization',     // User finalizes votes
+    'Waiting period',        // Wait for other users (progress indicator)
+    'Batch matching',        // All matches created at once
+    'Match notification'     // User gets notified with all matches
   ]
 };
 ```
+
+### Algorithm-Specific User Experience
+
+#### Greedy Algorithms (First Come First Served)
+- **Immediate Feedback**: Users get matches as soon as mutual likes are detected
+- **Progressive Results**: Matches trickle in over time as other users finalize votes
+- **Early Gratification**: Popular artworks may get matched quickly
+
+#### Non-Greedy Algorithms (Optimal, Preference Weighted, Random)
+- **Waiting Period**: Users must wait for all participants to finish voting
+- **Batch Results**: All matches revealed simultaneously
+- **Anticipation Building**: Single moment of reveal for all matches
+- **Progress Indicators**: Show how many users still need to finalize votes
 
 ### Design Guidelines
 - **Touch Targets**: Minimum 44px (11rem) for all interactive elements

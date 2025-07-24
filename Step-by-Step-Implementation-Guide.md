@@ -186,9 +186,10 @@ This guide provides a detailed, checkbox-driven roadmap for implementing ArtSwap
 ### 6.5 Admin Routes
 - [ ] Create `app/routes/admin.tsx` with admin dashboard
 - [ ] Create `app/routes/admin.groups.tsx` with group management
-- [ ] Create `app/routes/admin.events.tsx` with event management
+- [ ] Create `app/routes/admin.events.tsx` with event management and algorithm selection
 - [ ] Create `app/routes/admin.users.tsx` with user management
 - [ ] Create `app/routes/admin.moderation.tsx` with content moderation
+- [ ] Create `app/routes/admin.matching.tsx` with algorithm monitoring and manual triggers
 
 ---
 
@@ -232,6 +233,8 @@ This guide provides a detailed, checkbox-driven roadmap for implementing ArtSwap
 - [ ] Create `app/components/events/event-card.tsx` with event summary
 - [ ] Create `app/components/events/event-timeline.tsx` with phase visualization
 - [ ] Create `app/components/events/phase-indicator.tsx` with current phase display
+- [ ] Create `app/components/events/algorithm-selector.tsx` for admin event creation
+- [ ] Create `app/components/events/matching-status.tsx` to show algorithm progress
 
 ### 7.5 Notification & Match Components
 - [ ] Create `app/components/notifications/notification-list.tsx` with notification center
@@ -256,13 +259,17 @@ This guide provides a detailed, checkbox-driven roadmap for implementing ArtSwap
 - [ ] Implement vote retrieval for summary page with preference ordering
 - [ ] Add vote statistics calculation including preference metrics and finalization timestamps
 
-### 8.2 Preference-Based Matching Algorithm
-- [ ] Implement preference-based mutual like detection in `app/lib/db/match.ts`
-- [ ] Add match creation logic prioritizing higher mutual preferences
-- [ ] Implement enhanced tie-breaking rules (preference score → individual preference → timing)
-- [ ] Add preference-aware match statistics and reporting
-- [ ] Implement match notification triggering with preference context
-- [ ] Add match validation to ensure only votes with finalizedAt timestamp are considered
+### 8.2 Multiple Matching Algorithm System
+- [ ] Create `app/lib/matching/base.ts` with MatchingAlgorithmBase interface
+- [ ] Implement `app/lib/matching/first-come-first-served.ts` (greedy algorithm)
+- [ ] Implement `app/lib/matching/optimal-matching.ts` (Gale-Shapley stable matching)
+- [ ] Implement `app/lib/matching/preference-weighted.ts` (preference-prioritized matching)
+- [ ] Implement `app/lib/matching/random-matching.ts` (random assignment algorithm)
+- [ ] Create `app/lib/matching/registry.ts` to manage algorithm instances
+- [ ] Implement matching trigger logic in `app/lib/db/vote.ts` for vote finalization
+- [ ] Add algorithm-specific match validation and statistics
+- [ ] Update event creation to include algorithm selection
+- [ ] Add `matchingTriggered` field handling to prevent duplicate runs
 
 ### 8.3 Event Phase Management
 - [ ] Create `app/lib/events/phases.ts` with phase transition logic
@@ -337,10 +344,15 @@ This guide provides a detailed, checkbox-driven roadmap for implementing ArtSwap
   - [ ] Test vote finalization with timestamp setting
   - [ ] Test validation rules (no self-voting, no modification after finalizedAt is set)
   - [ ] Test finalization timestamp accuracy and immutability
-- [ ] Write tests for `app/lib/db/match.ts` preference-based matching algorithm
-  - [ ] Test mutual preference scoring
-  - [ ] Test tie-breaking rules
-  - [ ] Test match creation with votes that have finalizedAt timestamp only
+- [ ] Write tests for multiple matching algorithms in `app/lib/matching/`
+  - [ ] Test First Come First Served algorithm (greedy behavior)
+  - [ ] Test Optimal Matching algorithm (stable matching)
+  - [ ] Test Preference Weighted algorithm (mutual preference scoring)
+  - [ ] Test Random Matching algorithm (randomized assignment)
+  - [ ] Test algorithm registry and instance management
+  - [ ] Test matching trigger logic for greedy vs non-greedy algorithms
+  - [ ] Test `matchingTriggered` flag functionality
+  - [ ] Test event closure with different algorithms
 
 ### 10.3 Authentication Tests
 - [ ] Write tests for password hashing and verification

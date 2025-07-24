@@ -45,6 +45,13 @@ enum UserStatus {
     DEACTIVATED
 }
 
+enum MatchingAlgorithm {
+    FIRST_COME_FIRST_SERVED // Greedy: matches created as votes are finalized
+    OPTIMAL_MATCHING // Non-greedy: waits for all votes, optimal assignment
+    PREFERENCE_WEIGHTED // Non-greedy: prioritizes mutual high preferences
+    RANDOM_MATCHING // Non-greedy: random assignment of mutual likes
+}
+
 model Artist {
     id                      String               @id @default(uuid())
     email                   String               @unique
@@ -90,16 +97,18 @@ model GroupMembership {
 }
 
 model Event {
-    id              String               @id @default(uuid())
-    group           Group                @relation(fields: [groupId], references: [id])
-    groupId         String
-    phase           String // open, voting, closed, archived
-    submissionLimit Int
-    artworks        Artwork[]
-    matches         Match[]
-    votes           Vote[]
-    participations  EventParticipation[]
-    createdAt       DateTime             @default(now())
+    id                String               @id @default(uuid())
+    group             Group                @relation(fields: [groupId], references: [id])
+    groupId           String
+    phase             String // open, voting, closed, archived
+    submissionLimit   Int
+    matchingAlgorithm MatchingAlgorithm    @default(PREFERENCE_WEIGHTED)
+    matchingTriggered Boolean              @default(false) // For non-greedy algorithms
+    artworks          Artwork[]
+    matches           Match[]
+    votes             Vote[]
+    participations    EventParticipation[]
+    createdAt         DateTime             @default(now())
 }
 
 model Artwork {
