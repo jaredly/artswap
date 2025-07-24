@@ -4,13 +4,7 @@ import * as React from 'react';
 import {EmailLayout} from '../components/email-layout';
 import {EmailButton} from '../components/button';
 
-interface GroupInvitationProps {
-    inviteeName: string;
-    inviterName: string;
-    groupName: string;
-    joinUrl: string;
-    expirationDate: string;
-}
+import type {GroupInvitationProps} from '../types';
 
 function GroupInvitationEmail({inviteeName, inviterName, groupName, joinUrl, expirationDate}: GroupInvitationProps) {
     return (

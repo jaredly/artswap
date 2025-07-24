@@ -4,11 +4,7 @@ import * as React from 'react';
 import {EmailLayout} from '../components/email-layout';
 import {EmailButton} from '../components/button';
 
-interface VerificationEmailProps {
-    artistName: string;
-    verificationUrl: string;
-    expirationTime: string;
-}
+import type {VerificationEmailProps} from '../types';
 
 function VerificationEmail({artistName, verificationUrl, expirationTime}: VerificationEmailProps) {
     return (

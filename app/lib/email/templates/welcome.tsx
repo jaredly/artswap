@@ -4,10 +4,7 @@ import * as React from 'react';
 import {EmailLayout} from '../components/email-layout';
 import {EmailButton} from '../components/button';
 
-interface WelcomeEmailProps {
-    artistName: string;
-    verificationUrl: string;
-}
+import type {WelcomeEmailProps} from '../types';
 
 function WelcomeEmail({artistName, verificationUrl}: WelcomeEmailProps) {
     return (

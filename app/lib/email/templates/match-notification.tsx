@@ -4,15 +4,7 @@ import * as React from 'react';
 import {EmailLayout} from '../components/email-layout';
 import {EmailButton} from '../components/button';
 
-interface MatchNotificationProps {
-    artistName: string;
-    matchedArtworkTitle: string;
-    matchedArtworkImage: string;
-    yourArtworkTitle: string;
-    yourArtworkImage: string;
-    eventName: string;
-    viewMatchUrl: string;
-}
+import type {MatchNotificationProps} from '../types';
 
 function MatchNotification({
     artistName,

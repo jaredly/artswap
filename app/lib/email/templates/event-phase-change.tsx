@@ -4,14 +4,7 @@ import * as React from 'react';
 import {EmailLayout} from '../components/email-layout';
 import {EmailButton} from '../components/button';
 
-interface EventPhaseChangeProps {
-    artistName: string;
-    eventName: string;
-    oldPhase: string;
-    newPhase: string;
-    actionUrl: string;
-    actionText: string;
-}
+import type {EventPhaseChangeProps} from '../types';
 
 function EventPhaseChangeEmail({artistName, eventName, oldPhase, newPhase, actionUrl, actionText}: EventPhaseChangeProps) {
     return (

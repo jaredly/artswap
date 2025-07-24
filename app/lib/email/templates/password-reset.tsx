@@ -4,11 +4,7 @@ import * as React from 'react';
 import {EmailLayout} from '../components/email-layout';
 import {EmailButton} from '../components/button';
 
-interface PasswordResetProps {
-    artistName: string;
-    resetUrl: string;
-    expirationTime: string;
-}
+import type {PasswordResetProps} from '../types';
 
 function PasswordResetEmail({artistName, resetUrl, expirationTime}: PasswordResetProps) {
     return (
