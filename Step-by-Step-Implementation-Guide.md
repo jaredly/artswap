@@ -143,23 +143,23 @@ This guide provides a detailed, checkbox-driven roadmap for implementing ArtSwap
 - [x] Create `app/lib/email/templates/event-phase-change.tsx` with phase change email
 
 ### 5.2 Email Service
-- [ ] Create `app/lib/email/types.ts` with email prop interfaces
-- [ ] Create `app/lib/email/send.ts` with Mailgun integration and email service
-- [ ] Create `app/lib/email/index.ts` exporting email utilities
-- [ ] Test email preview server: `pnpm email:dev`
+- [x] Create `app/lib/email/types.ts` with email prop interfaces
+- [x] Create `app/lib/email/send.ts` with Mailgun integration and email service
+- [x] Create `app/lib/email/index.ts` exporting email utilities
+- [x] Test email preview server: `pnpm email:dev`
 
 ---
 
 ## Phase 6: Core Routes & Pages
 
 ### 6.1 Authentication Routes
-- [ ] Create `app/routes/_auth.tsx` with authentication layout
-- [ ] Create `app/routes/login.tsx` with login page and action
-- [ ] Create `app/routes/signup.tsx` with signup page and action
-- [ ] Create `app/routes/verify-email.tsx` with email verification
-- [ ] Create `app/routes/forgot-password.tsx` with password reset request
-- [ ] Create `app/routes/reset-password.tsx` with password reset form
-- [ ] Create `app/routes/logout.tsx` with logout action
+- [x] Create `app/routes/_auth.tsx` with authentication layout
+- [x] Create `app/routes/login.tsx` with login page and action
+- [x] Create `app/routes/signup.tsx` with signup page and action
+- [x] Create `app/routes/verify-email.tsx` with email verification
+- [x] Create `app/routes/forgot-password.tsx` with password reset request
+- [x] Create `app/routes/reset-password.tsx` with password reset form
+- [x] Create `app/routes/logout.tsx` with logout action
 
 ### 6.2 Onboarding Routes
 - [ ] Create `app/routes/onboarding.tsx` with onboarding flow
