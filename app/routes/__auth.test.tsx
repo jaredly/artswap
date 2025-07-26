@@ -1,11 +1,16 @@
 // app/routes/__auth.test.tsx
-import {describe, it, expect, vi} from 'vitest';
+import {describe, it, expect, vi, beforeAll, beforeEach} from 'vitest';
 import {action as loginAction} from './login';
 import {action as signupAction} from './signup';
 import {action as logoutAction} from './logout';
 import {action as forgotPasswordAction} from './forgot-password';
 import {action as resetPasswordAction} from './reset-password';
 import {loader as verifyEmailLoader} from './verify-email';
+import {createArtist, deleteArtist} from '../lib/db/artist';
+import {hashPassword} from '../lib/auth/password';
+import prisma from '~/lib/db';
+import {createJWT, getSessionUserId} from '~/lib/auth';
+import {success} from 'zod';
 
 function mockRequest(form: Record<string, string>) {
     const params = new URLSearchParams(form);
@@ -23,6 +28,9 @@ function mockRequest(form: Record<string, string>) {
 }
 
 describe('Auth Routes', () => {
+    beforeEach(async () => {
+        await prisma.artist.deleteMany();
+    });
     it('login: missing fields', async () => {
         const res = await loginAction({request: mockRequest({}), params: {}, context: {}});
         expect(await res.text()).toContain('Email and password are required.');
@@ -34,10 +42,17 @@ describe('Auth Routes', () => {
     });
 
     it('login: valid credentials', async () => {
-        // Replace with valid test credentials if available
-        const res = await loginAction({request: mockRequest({email: 'test@example.com', password: 'password123'}), params: {}, context: {}});
-        // Accept either redirect or success message
-        expect(res.status === 302 || (await res.text()).includes('Welcome')).toBe(true);
+        // Create a user for login
+        const password = 'testpass123';
+        const artist = await createArtist({
+            email: 'test-login_auth@example.com',
+            passwordHash: await hashPassword(password, 1),
+            fullName: 'Login Test User',
+        });
+        const res = await loginAction({request: mockRequest({email: artist.email, password}), params: {}, context: {}});
+        expect(res.status).toBe(302);
+        expect(res.headers.get('Set-Cookie')).toContain('artswap_session=');
+        await deleteArtist(artist.id);
     });
 
     it('signup: missing fields', async () => {
@@ -46,19 +61,42 @@ describe('Auth Routes', () => {
     });
 
     it('signup: duplicate email', async () => {
+        const artist = await createArtist({
+            email: 'test@example.com',
+            passwordHash: await hashPassword('lolok', 1),
+            fullName: 'Login Test User',
+        });
+
         const res = await signupAction({
-            request: mockRequest({email: 'test@example.com', password: 'password123', name: 'Test'}),
+            request: mockRequest({
+                email: 'test@example.com',
+                password: 'password123',
+                fullName: 'Test',
+            }),
             params: {},
             context: {},
         });
-        expect(await res.text()).toContain('Email already exists');
+        expect(await res.text()).toContain('Email already registered');
+        await deleteArtist(artist.id);
     });
 
     it('signup: valid signup', async () => {
         // Use a random email to avoid collision
         const email = `user${Math.random().toString(36).slice(2)}@example.com`;
-        const res = await signupAction({request: mockRequest({email, password: 'password123', name: 'User'}), params: {}, context: {}});
-        expect(res.status === 302 || (await res.text()).includes('Verify your email')).toBe(true);
+        const res = await signupAction({
+            request: mockRequest({
+                email,
+                password: 'password123',
+                fullName: 'User',
+            }),
+            params: {},
+            context: {},
+        });
+        expect(res.status).toBe(302);
+        expect(res.headers.get('Set-Cookie')).toContain('artswap_session=');
+        const id = getSessionUserId(res.headers.get('Set-Cookie'));
+        expect(id).not.toBeNull();
+        await deleteArtist(id!);
     });
 
     it('logout: destroys session', async () => {
@@ -91,8 +129,14 @@ describe('Auth Routes', () => {
     });
 
     it('forgot-password: valid email', async () => {
+        const artist = await createArtist({
+            email: 'test@example.com',
+            passwordHash: await hashPassword('lolok', 1),
+            fullName: 'Login Test User',
+        });
         const res = await forgotPasswordAction({request: mockRequest({email: 'test@example.com'}), params: {}, context: {}});
-        expect(await res.text()).toContain('Password reset email sent');
+        expect(await res.text()).toContain('A password reset link has been sent');
+        await deleteArtist(artist.id);
     });
 
     it('reset-password: missing fields', async () => {
@@ -102,13 +146,24 @@ describe('Auth Routes', () => {
 
     it('reset-password: invalid token', async () => {
         const res = await resetPasswordAction({request: mockRequest({token: 'badtoken', password: 'newpass'}), params: {}, context: {}});
-        expect(await res.text()).toContain('Invalid or expired token');
+        expect(await res.text()).toContain('Invalid or expired reset token.');
     });
 
     it('reset-password: valid token', async () => {
+        const artist = await createArtist({
+            email: 'test@example.com',
+            passwordHash: await hashPassword('lolok', 1),
+            fullName: 'Login Test User',
+        });
+
+        const token = createJWT({artistId: artist.id, type: 'password-reset'}, '1h');
         // Replace with a valid token if available
-        const res = await resetPasswordAction({request: mockRequest({token: 'validtoken', password: 'newpass'}), params: {}, context: {}});
-        expect(res.status === 302 || (await res.text()).includes('Password reset successful')).toBe(true);
+        const res = await resetPasswordAction({request: mockRequest({token, password: 'newpass'}), params: {}, context: {}});
+        expect(await res.json()).toMatchObject({
+            success: true,
+        });
+
+        await deleteArtist(artist.id);
     });
 
     it('verify-email: missing token', async () => {
@@ -122,13 +177,22 @@ describe('Auth Routes', () => {
         const req = new Request('http://localhost/verify-email?token=badtoken');
         const res = await verifyEmailLoader({request: req, params: {}, context: {}});
         expect(res.success).toBe(false);
-        expect(res.message).toContain('Invalid or expired token');
+        expect(res.message).toContain('Invalid or expired verification token.');
     });
 
     it('verify-email: valid token', async () => {
+        const artist = await createArtist({
+            email: 'test@example.com',
+            passwordHash: await hashPassword('lolok', 1),
+            fullName: 'Login Test User',
+        });
+
+        const token = createJWT({artistId: artist.id, type: 'verify-email'}, '1h');
         // Replace with a valid token if available
-        const req = new Request('http://localhost/verify-email?token=validtoken');
+        const req = new Request('http://localhost/verify-email?token=' + token);
         const res = await verifyEmailLoader({request: req, params: {}, context: {}});
-        expect(res.success === true || res.message.includes('Email verified')).toBe(true);
+        expect(res).toMatchObject({success: true});
+
+        await deleteArtist(artist.id);
     });
 });

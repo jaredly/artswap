@@ -1,7 +1,7 @@
 // app/lib/auth/password.ts
 import bcrypt from 'bcryptjs';
 
-const BCRYPT_ROUNDS = Number(process.env.BCRYPT_ROUNDS) || 12;
+const BCRYPT_ROUNDS = process.env.NODE_ENV === 'test' ? 1 : Number(process.env.BCRYPT_ROUNDS) || 12;
 
 /**
  * Hash a plain text password using bcrypt.

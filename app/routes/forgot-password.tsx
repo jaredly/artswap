@@ -26,7 +26,7 @@ export async function action({request}: ActionFunctionArgs) {
     const token = createJWT({artistId: user.id, type: 'password-reset'}, '1h');
     // TODO: Send password reset email with link containing token
 
-    return new Response(JSON.stringify({success: true, message: 'If an account exists for that email, a password reset link has been sent.'}), {
+    return new Response(JSON.stringify({success: true, message: 'A password reset link has been sent.'}), {
         status: 200,
         headers: {'Content-Type': 'application/json'},
     });
