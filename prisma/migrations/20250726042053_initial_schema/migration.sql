@@ -39,6 +39,8 @@ CREATE TABLE "Event" (
     "groupId" TEXT NOT NULL,
     "phase" TEXT NOT NULL,
     "submissionLimit" INTEGER NOT NULL,
+    "matchingAlgorithm" TEXT NOT NULL DEFAULT 'PREFERENCE_WEIGHTED',
+    "matchingTriggered" BOOLEAN NOT NULL DEFAULT false,
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT "Event_groupId_fkey" FOREIGN KEY ("groupId") REFERENCES "Group" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
 );

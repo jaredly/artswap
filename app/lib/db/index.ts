@@ -4,14 +4,20 @@ import {PrismaClient} from '../../../generated/prisma/client';
 // In development, prevent multiple instances of PrismaClient due to hot-reloading
 let prisma: PrismaClient;
 
+declare global {
+    var _prisma: PrismaClient;
+}
+
 if (process.env.NODE_ENV === 'production') {
     prisma = new PrismaClient();
+} else if (process.env.NODE_ENV === 'test') {
+    process.env.DATABASE_URL = 'file:memory:?cache=shared';
+    prisma = new PrismaClient();
 } else {
-    // biome-ignore lint/suspicious/noAssignInExpressions: allow global assignment for dev
-    if (!(globalThis as any).prisma) {
-        (globalThis as any).prisma = new PrismaClient();
+    if (!globalThis._prisma) {
+        globalThis._prisma = new PrismaClient();
     }
-    prisma = (globalThis as any).prisma;
+    prisma = globalThis._prisma;
 }
 
 export default prisma;

@@ -2,9 +2,9 @@
 import {Form, useActionData, useNavigation} from 'react-router-dom';
 import {redirect} from 'react-router-dom';
 import type {ActionFunctionArgs} from 'react-router';
-import {getArtistByEmail} from '~/lib/db/artist';
 import {verifyPassword} from '~/lib/auth/password';
 import {createSessionCookie} from '~/lib/auth/session';
+import {getArtistByEmail} from '~/lib/db/artist';
 
 export async function action({request}: ActionFunctionArgs) {
     const formData = await request.formData();

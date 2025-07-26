@@ -18,9 +18,9 @@ async function clearDb() {
 }
 
 describe('calculateMatches', () => {
-    beforeEach(async () => {
-        await clearDb();
-    });
+    // beforeEach(async () => {
+    //     await clearDb();
+    // });
 
     afterEach(async () => {
         await clearDb();
